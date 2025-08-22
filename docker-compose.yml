@@ -1,0 +1,39 @@
+
+
+services:
+  www:
+    image: php:apache
+    volumes:
+      - "./:/var/www/html"
+    ports:
+      - "80:80"
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+
+  db:
+    image: mysql:latest
+    environment:
+      - MYSQL_DATABASE=skincare_db
+      - MYSQL_USER=php_docker
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=password
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+
+  phpmyadmin:
+    image: arm64v8/phpmyadmin
+    ports:
+      - "8001:80"
+    environment:
+      - PMA_HOST=db
+      - PMA_PORT=3306
+    depends_on:
+      - db
+
+volumes:
+  db_data:
