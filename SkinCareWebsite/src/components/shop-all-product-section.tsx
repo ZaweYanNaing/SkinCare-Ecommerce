@@ -1,0 +1,22 @@
+import React from 'react';
+import { Link } from 'react-router';
+
+const ShopAllProductSection: React.FC = () => {
+  return (
+    <section className="px-4 py-20 text-center sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl">
+        <h2 className="mb-4 text-4xl font-bold text-gray-900">Ready to Transform Your Skin?</h2>
+        <p className="mb-8 text-lg text-gray-600">
+          Explore our full range of skincare products and start your journey to healthier, more radiant skin today.
+        </p>
+        <Link to={'/product'}>
+          <button className="rounded-full bg-[#039963] px-8 py-3 font-semibold text-white shadow-lg transition duration-300 ease-in-out hover:bg-green-700">
+            Shop all product
+          </button>
+        </Link>
+      </div>
+    </section>
+  );
+};
+
+export default ShopAllProductSection;

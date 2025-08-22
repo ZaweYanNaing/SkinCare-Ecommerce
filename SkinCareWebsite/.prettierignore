@@ -1,0 +1,14 @@
+src/components/ui/*
+node_modules
+dist
+build
+.next
+.nuxt
+.cache
+.parcel-cache
+.DS_Store
+*.log
+bun.lock
+package-lock.json
+yarn.lock
+
