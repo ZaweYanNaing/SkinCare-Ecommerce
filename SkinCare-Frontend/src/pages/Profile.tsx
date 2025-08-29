@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router';
-import { AiOutlineUser, AiOutlineEdit, AiOutlineSave, AiOutlineClose, AiOutlineHome } from 'react-icons/ai';
-import { BsPhone, BsEnvelope, BsGenderAmbiguous, BsHouse } from 'react-icons/bs';
-import { MdOutlineShoppingBag, MdOutlinePayment } from 'react-icons/md';
+import { AiOutlineUser, AiOutlineEdit, AiOutlineSave, AiOutlineClose, AiOutlineHome, AiOutlineCalendar } from 'react-icons/ai';
+import { BsPhone, BsEnvelope, BsGenderAmbiguous, BsHouse, BsFilter } from 'react-icons/bs';
+import { MdOutlineShoppingBag, MdOutlinePayment, MdClear } from 'react-icons/md';
 
 interface UserData {
   CID: number;
@@ -36,10 +36,16 @@ interface Order {
 function Profile() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editedData, setEditedData] = useState<UserData | null>(null);
   const [activeTab, setActiveTab] = useState<'profile' | 'orders'>('profile');
   const [loading, setLoading] = useState(true);
+  const [dateFilter, setDateFilter] = useState({
+    startDate: '',
+    endDate: '',
+    isActive: false
+  });
 
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -52,6 +58,29 @@ function Profile() {
       fetchUserOrders();
     }
   }, [userId]);
+
+  // Filter orders based on date range
+  useEffect(() => {
+    if (!dateFilter.isActive) {
+      setFilteredOrders(orders);
+    } else {
+      const filtered = orders.filter(order => {
+        const orderDate = new Date(order.orderDate);
+        const start = dateFilter.startDate ? new Date(dateFilter.startDate) : null;
+        const end = dateFilter.endDate ? new Date(dateFilter.endDate) : null;
+
+        if (start && end) {
+          return orderDate >= start && orderDate <= end;
+        } else if (start) {
+          return orderDate >= start;
+        } else if (end) {
+          return orderDate <= end;
+        }
+        return true;
+      });
+      setFilteredOrders(filtered);
+    }
+  }, [orders, dateFilter]);
 
   const fetchUserData = async () => {
     try {
@@ -287,6 +316,22 @@ function Profile() {
     setIsEditing(false);
   };
 
+  const handleDateFilterChange = (field: 'startDate' | 'endDate', value: string) => {
+    setDateFilter(prev => ({
+      ...prev,
+      [field]: value,
+      isActive: value !== '' || prev.startDate !== '' || prev.endDate !== ''
+    }));
+  };
+
+  const clearDateFilter = () => {
+    setDateFilter({
+      startDate: '',
+      endDate: '',
+      isActive: false
+    });
+  };
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'confirmed':
@@ -516,17 +561,79 @@ function Profile() {
 
             {activeTab === 'orders' && (
               <div className="space-y-6">
-                <h2 className="text-xl font-semibold text-gray-900">Order History</h2>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <h2 className="text-xl font-semibold text-gray-900">Order History</h2>
+                  
+                  {/* Date Filter Controls */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-gray-50 p-4 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <BsFilter className="text-gray-500" />
+                      <span className="text-sm font-medium text-gray-700">Filter by date:</span>
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <div className="flex items-center gap-2">
+                        <AiOutlineCalendar className="text-gray-400" />
+                        <input
+                          type="date"
+                          value={dateFilter.startDate}
+                          onChange={(e) => handleDateFilterChange('startDate', e.target.value)}
+                          className="px-3 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          placeholder="Start date"
+                        />
+                      </div>
+                      
+                      <span className="text-gray-500 self-center">to</span>
+                      
+                      <div className="flex items-center gap-2">
+                        <AiOutlineCalendar className="text-gray-400" />
+                        <input
+                          type="date"
+                          value={dateFilter.endDate}
+                          onChange={(e) => handleDateFilterChange('endDate', e.target.value)}
+                          className="px-3 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          placeholder="End date"
+                        />
+                      </div>
+                      
+                      {dateFilter.isActive && (
+                        <button
+                          onClick={clearDateFilter}
+                          className="flex items-center gap-1 px-2 py-1 text-sm text-red-600 hover:text-red-800 transition-colors"
+                          title="Clear filter"
+                        >
+                          <MdClear />
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
 
-                {orders.length === 0 ? (
+                {/* Filter Results Summary */}
+                {dateFilter.isActive && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p className="text-sm text-blue-800">
+                      Showing {filteredOrders.length} of {orders.length} orders
+                      {dateFilter.startDate && ` from ${new Date(dateFilter.startDate).toLocaleDateString()}`}
+                      {dateFilter.endDate && ` to ${new Date(dateFilter.endDate).toLocaleDateString()}`}
+                    </p>
+                  </div>
+                )}
+
+                {filteredOrders.length === 0 ? (
                   <div className="text-center py-12">
                     <MdOutlineShoppingBag className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">No orders yet</h3>
-                    <p className="mt-1 text-sm text-gray-500">Start shopping to see your orders here.</p>
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">
+                      {dateFilter.isActive ? 'No orders found for selected date range' : 'No orders yet'}
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      {dateFilter.isActive ? 'Try adjusting your date filter or clear it to see all orders.' : 'Start shopping to see your orders here.'}
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {orders.map((order) => (
+                    {filteredOrders.map((order) => (
                       <div key={order.OrderID} className="border border-gray-200 rounded-lg p-6">
                         <div className="flex justify-between items-start mb-4">
                           <div>
