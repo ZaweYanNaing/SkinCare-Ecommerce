@@ -292,7 +292,9 @@ export default function navbar() {
               </PopoverTrigger>
               <PopoverContent className="w-30">
                 <div className="flex flex-col items-center justify-between gap-y-3">
+                  <Link to='/profile'>
                   <p className="cursor-pointer text-xs md:text-xs lg:text-sm border-0">Profile</p>
+                  </Link>
                   <div className="cursor-pointer w-full flex justify-center">
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
