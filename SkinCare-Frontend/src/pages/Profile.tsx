@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router';
-import { AiOutlineUser, AiOutlineEdit, AiOutlineSave, AiOutlineClose, AiOutlineHome, AiOutlineCalendar } from 'react-icons/ai';
+import { AiOutlineUser, AiOutlineEdit, AiOutlineSave, AiOutlineClose, AiOutlineHome } from 'react-icons/ai';
 import { BsPhone, BsEnvelope, BsGenderAmbiguous, BsHouse, BsFilter } from 'react-icons/bs';
 import { MdOutlineShoppingBag, MdOutlinePayment, MdClear } from 'react-icons/md';
+import { DatePicker } from '@/components/ui/date-picker';
 
 interface UserData {
   CID: number;
@@ -42,9 +43,9 @@ function Profile() {
   const [activeTab, setActiveTab] = useState<'profile' | 'orders'>('profile');
   const [loading, setLoading] = useState(true);
   const [dateFilter, setDateFilter] = useState({
-    startDate: '',
-    endDate: '',
-    isActive: false
+    startDate: undefined as Date | undefined,
+    endDate: undefined as Date | undefined,
+    isActive: false,
   });
 
   const navigate = useNavigate();
@@ -64,10 +65,10 @@ function Profile() {
     if (!dateFilter.isActive) {
       setFilteredOrders(orders);
     } else {
-      const filtered = orders.filter(order => {
+      const filtered = orders.filter((order) => {
         const orderDate = new Date(order.orderDate);
-        const start = dateFilter.startDate ? new Date(dateFilter.startDate) : null;
-        const end = dateFilter.endDate ? new Date(dateFilter.endDate) : null;
+        const start = dateFilter.startDate;
+        const end = dateFilter.endDate;
 
         if (start && end) {
           return orderDate >= start && orderDate <= end;
@@ -143,8 +144,6 @@ function Profile() {
           setEditedData(mockUserData);
         }
       }
-
-
     } catch (error) {
       console.error('Error fetching user data:', error);
       toast.error('Error loading profile');
@@ -155,51 +154,8 @@ function Profile() {
 
   const fetchUserOrders = async () => {
     try {
-      // Mock order data for testing
-      const mockOrders = [
-        {
-          OrderID: 1,
-          orderDate: '2025-08-20T10:30:00',
-          status: 'confirmed',
-          totalAmount: 125000,
-          paymentMethod: 'KBZ Bank',
-          items: [
-            {
-              ID: 1,
-              ProductID: 1,
-              ProductName: 'Bella Face Wash',
-              Quantity: 2,
-              unitPrice: 35000,
-              Image: 'face-wash-1.jpg',
-            },
-            {
-              ID: 2,
-              ProductID: 2,
-              ProductName: 'EAORON Toner',
-              Quantity: 1,
-              unitPrice: 42000,
-              Image: 'toner-1.jpg',
-            },
-          ],
-        },
-        {
-          OrderID: 2,
-          orderDate: '2025-08-15T14:20:00',
-          status: 'delivered',
-          totalAmount: 89000,
-          paymentMethod: 'AyaPay',
-          items: [
-            {
-              ID: 3,
-              ProductID: 5,
-              ProductName: 'Bella Moisturizer',
-              Quantity: 1,
-              unitPrice: 48000,
-              Image: 'cream-1.jpg',
-            },
-          ],
-        },
-      ];
+     
+      
 
       try {
         // Try different possible backend URLs (Docker setup)
@@ -233,16 +189,14 @@ function Profile() {
           throw new Error('No backend available');
         }
       } catch (apiError) {
-        console.log('Using mock orders - backend not available');
-        setOrders(mockOrders);
+        console.log('backend not available');
+        
       }
     } catch (error) {
       console.error('Error fetching orders:', error);
       toast.error('Error loading orders');
     }
   };
-
-
 
   const handleSaveProfile = async () => {
     if (!editedData) return;
@@ -254,7 +208,7 @@ function Profile() {
       const possibleUrls = [
         'http://localhost/user/update-profile.php',
         'http://localhost:80/user/update-profile.php',
-        'http://127.0.0.1/user/update-profile.php'
+        'http://127.0.0.1/user/update-profile.php',
       ];
 
       let apiSuccess = false;
@@ -268,15 +222,15 @@ function Profile() {
           });
 
           console.log('Response status:', response.status);
-          
+
           if (response.ok) {
             const text = await response.text();
             console.log('Response text:', text);
-            
+
             if (text.startsWith('{') || text.startsWith('[')) {
               const data = JSON.parse(text);
               console.log('Parsed response:', data);
-              
+
               if (data.success) {
                 setUserData(editedData);
                 setIsEditing(false);
@@ -316,19 +270,19 @@ function Profile() {
     setIsEditing(false);
   };
 
-  const handleDateFilterChange = (field: 'startDate' | 'endDate', value: string) => {
-    setDateFilter(prev => ({
+  const handleDateFilterChange = (field: 'startDate' | 'endDate', value: Date | undefined) => {
+    setDateFilter((prev) => ({
       ...prev,
       [field]: value,
-      isActive: value !== '' || prev.startDate !== '' || prev.endDate !== ''
+      isActive: value !== undefined || (field === 'startDate' ? prev.endDate !== undefined : prev.startDate !== undefined),
     }));
   };
 
   const clearDateFilter = () => {
     setDateFilter({
-      startDate: '',
-      endDate: '',
-      isActive: false
+      startDate: undefined,
+      endDate: undefined,
+      isActive: false,
     });
   };
 
@@ -369,20 +323,11 @@ function Profile() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Go Home Button */}
-        <div className="mb-6">
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-md"
-          >
-            <AiOutlineHome className="mr-2" />
-            Go Home
-          </button>
-        </div>
         
+
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex items-center space-x-6">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6 md:flex justify-between items-center">
+          <div className="flex items-center space-x-6 ">
             <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
               <AiOutlineUser className="w-12 h-12 text-gray-400" />
             </div>
@@ -392,6 +337,18 @@ function Profile() {
               <p className="text-sm text-green-600 mt-1">Skin Type: {userData.SkinType || 'Not specified'}</p>
             </div>
           </div>
+
+          {/* Go Home Button */}
+        <div className="my-8">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-md"
+          >
+            <AiOutlineHome className="mr-2" />
+            Go Home
+          </button>
+        </div>
+
         </div>
 
         {/* Navigation Tabs */}
@@ -548,8 +505,6 @@ function Profile() {
                         <option value="Oily">Oily</option>
                         <option value="Dry">Dry</option>
                         <option value="Combination">Combination</option>
-                        <option value="Sensitive">Sensitive</option>
-                        <option value="Normal">Normal</option>
                       </select>
                     ) : (
                       <p className="px-3 py-2 bg-gray-50 rounded-lg">{userData.SkinType || 'Not specified'}</p>
@@ -563,47 +518,41 @@ function Profile() {
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <h2 className="text-xl font-semibold text-gray-900">Order History</h2>
-                  
+
                   {/* Date Filter Controls */}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-gray-50 p-4 rounded-lg">
-                    <div className="flex items-center gap-2">
+                  <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 bg-gray-50 p-4 rounded-lg border">
+                    <div className="flex items-center gap-2 mb-2 lg:mb-0">
                       <BsFilter className="text-gray-500" />
-                      <span className="text-sm font-medium text-gray-700">Filter by date:</span>
+                      <span className="text-sm font-medium text-gray-700">Filter by date range:</span>
                     </div>
-                    
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <div className="flex items-center gap-2">
-                        <AiOutlineCalendar className="text-gray-400" />
-                        <input
-                          type="date"
-                          value={dateFilter.startDate}
-                          onChange={(e) => handleDateFilterChange('startDate', e.target.value)}
-                          className="px-3 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                          placeholder="Start date"
-                        />
-                      </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
+                      <DatePicker
+                        date={dateFilter.startDate}
+                        onDateChange={(date) => handleDateFilterChange('startDate', date)}
+                        label="From"
+                        placeholder="Select start date"
+                        className="w-full sm:w-48"
+                      />
+
                       
-                      <span className="text-gray-500 self-center">to</span>
-                      
-                      <div className="flex items-center gap-2">
-                        <AiOutlineCalendar className="text-gray-400" />
-                        <input
-                          type="date"
-                          value={dateFilter.endDate}
-                          onChange={(e) => handleDateFilterChange('endDate', e.target.value)}
-                          className="px-3 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                          placeholder="End date"
-                        />
-                      </div>
-                      
+
+                      <DatePicker
+                        date={dateFilter.endDate}
+                        onDateChange={(date) => handleDateFilterChange('endDate', date)}
+                        label="To"
+                        placeholder="Select end date"
+                        className="w-full sm:w-48"
+                      />
+
                       {dateFilter.isActive && (
                         <button
                           onClick={clearDateFilter}
-                          className="flex items-center gap-1 px-2 py-1 text-sm text-red-600 hover:text-red-800 transition-colors"
-                          title="Clear filter"
+                          className="flex items-center gap-1 px-3 py-2 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors border border-red-200"
+                          title="Clear date filter"
                         >
-                          <MdClear />
-                          Clear
+                          <MdClear className="h-4 w-4" />
+                          Clear Filter
                         </button>
                       )}
                     </div>
@@ -615,8 +564,8 @@ function Profile() {
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                     <p className="text-sm text-blue-800">
                       Showing {filteredOrders.length} of {orders.length} orders
-                      {dateFilter.startDate && ` from ${new Date(dateFilter.startDate).toLocaleDateString()}`}
-                      {dateFilter.endDate && ` to ${new Date(dateFilter.endDate).toLocaleDateString()}`}
+                      {dateFilter.startDate && ` from ${dateFilter.startDate.toLocaleDateString()}`}
+                      {dateFilter.endDate && ` to ${dateFilter.endDate.toLocaleDateString()}`}
                     </p>
                   </div>
                 )}
@@ -628,7 +577,9 @@ function Profile() {
                       {dateFilter.isActive ? 'No orders found for selected date range' : 'No orders yet'}
                     </h3>
                     <p className="mt-1 text-sm text-gray-500">
-                      {dateFilter.isActive ? 'Try adjusting your date filter or clear it to see all orders.' : 'Start shopping to see your orders here.'}
+                      {dateFilter.isActive
+                        ? 'Try adjusting your date filter or clear it to see all orders.'
+                        : 'Start shopping to see your orders here.'}
                     </p>
                   </div>
                 ) : (
