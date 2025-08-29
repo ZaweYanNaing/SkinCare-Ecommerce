@@ -7,6 +7,7 @@ import ProductDeatil from '../pages/ProductDetail';
 import WishList from '../pages/WishList';
 import SignIn from '../pages/auth/SignIn';
 import SignUp from '../pages/auth/SignUp';
+import Profile from '../pages/Profile';
 
 export const router = createBrowserRouter([
   {
@@ -17,6 +18,11 @@ export const router = createBrowserRouter([
     path: '/auth/signin',
     element: <SignIn />,
   },
+  {
+    path: '/profile',
+    element: <Profile/>,
+  },
+
   {
     path: '/',
     element: <Layout />,
