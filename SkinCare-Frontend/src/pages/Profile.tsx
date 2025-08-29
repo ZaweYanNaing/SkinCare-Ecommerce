@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { AiOutlineUser, AiOutlineEdit, AiOutlineSave, AiOutlineClose } from 'react-icons/ai';
+import { useNavigate } from 'react-router';
+import { AiOutlineUser, AiOutlineEdit, AiOutlineSave, AiOutlineClose, AiOutlineHome } from 'react-icons/ai';
 import { BsPhone, BsEnvelope, BsGenderAmbiguous, BsHouse } from 'react-icons/bs';
 import { MdOutlineShoppingBag, MdOutlinePayment } from 'react-icons/md';
 
@@ -39,8 +40,8 @@ function Profile() {
   const [editedData, setEditedData] = useState<UserData | null>(null);
   const [activeTab, setActiveTab] = useState<'profile' | 'orders'>('profile');
   const [loading, setLoading] = useState(true);
-  const [profileImage, setProfileImage] = useState<string>('');
 
+  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const userId = user.id;
   console.log(user);
@@ -68,11 +69,11 @@ function Profile() {
 
       // Try to fetch from API first, fallback to mock data
       try {
-        // Try different possible backend URLs
+        // Try different possible backend URLs (Docker setup)
         const possibleUrls = [
-          `http://localhost:8080/user/profile.php?id=${userId}`,
           `http://localhost/user/profile.php?id=${userId}`,
-          `http://localhost:3001/user/profile.php?id=${userId}`,
+          `http://localhost:80/user/profile.php?id=${userId}`,
+          `http://127.0.0.1/user/profile.php?id=${userId}`,
         ];
 
         let apiSuccess = false;
@@ -114,11 +115,7 @@ function Profile() {
         }
       }
 
-      // Load profile image from localStorage if exists
-      const savedImage = localStorage.getItem(`profileImage_${userId}`);
-      if (savedImage) {
-        setProfileImage(savedImage);
-      }
+
     } catch (error) {
       console.error('Error fetching user data:', error);
       toast.error('Error loading profile');
@@ -176,11 +173,11 @@ function Profile() {
       ];
 
       try {
-        // Try different possible backend URLs
+        // Try different possible backend URLs (Docker setup)
         const possibleUrls = [
-          `http://localhost:8080/order/user-orders.php?userId=${userId}`,
           `http://localhost/order/user-orders.php?userId=${userId}`,
-          `http://localhost:3001/order/user-orders.php?userId=${userId}`,
+          `http://localhost:80/order/user-orders.php?userId=${userId}`,
+          `http://127.0.0.1/order/user-orders.php?userId=${userId}`,
         ];
 
         let apiSuccess = false;
@@ -216,55 +213,68 @@ function Profile() {
     }
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        // 5MB limit
-        toast.error('Image size should be less than 5MB');
-        return;
-      }
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const imageData = e.target?.result as string;
-        setProfileImage(imageData);
-        // Save to localStorage
-        localStorage.setItem(`profileImage_${userId}`, imageData);
-        toast.success('Profile image updated!');
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const handleSaveProfile = async () => {
     if (!editedData) return;
 
-    try {
-      // Try to save to API first, fallback to localStorage
-      try {
-        const response = await fetch('http://localhost/skincare-backend/user/update-profile.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(editedData),
-        });
+    console.log('Saving profile data:', editedData);
 
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success) {
-            setUserData(editedData);
-            setIsEditing(false);
-            toast.success('Profile updated successfully!');
-            return;
+    try {
+      // Try different possible backend URLs (Docker setup)
+      const possibleUrls = [
+        'http://localhost/user/update-profile.php',
+        'http://localhost:80/user/update-profile.php',
+        'http://127.0.0.1/user/update-profile.php'
+      ];
+
+      let apiSuccess = false;
+      for (const url of possibleUrls) {
+        try {
+          console.log(`Trying to save to: ${url}`);
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(editedData),
+          });
+
+          console.log('Response status:', response.status);
+          
+          if (response.ok) {
+            const text = await response.text();
+            console.log('Response text:', text);
+            
+            if (text.startsWith('{') || text.startsWith('[')) {
+              const data = JSON.parse(text);
+              console.log('Parsed response:', data);
+              
+              if (data.success) {
+                setUserData(editedData);
+                setIsEditing(false);
+                toast.success('Profile updated in database successfully!');
+                apiSuccess = true;
+                break;
+              } else {
+                console.error('API returned error:', data.message);
+                toast.error(data.message || 'Failed to update profile');
+              }
+            } else {
+              console.error('Invalid JSON response:', text);
+            }
           }
+        } catch (urlError) {
+          console.error(`Error with URL ${url}:`, urlError);
+          continue;
         }
-        throw new Error('API not available');
-      } catch (apiError) {
+      }
+
+      if (!apiSuccess) {
+        console.log('All API attempts failed, saving locally');
         // Fallback: save to localStorage
         localStorage.setItem(`userData_${userId}`, JSON.stringify(editedData));
         setUserData(editedData);
         setIsEditing(false);
-        toast.success('Profile updated locally!');
+        toast.success('Profile updated locally (database not available)');
       }
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -314,21 +324,22 @@ function Profile() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Go Home Button */}
+        <div className="mb-6">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-md"
+          >
+            <AiOutlineHome className="mr-2" />
+            Go Home
+          </button>
+        </div>
+        
         {/* Header */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex items-center space-x-6">
-            <div className="relative">
-              <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-                {profileImage ? (
-                  <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <AiOutlineUser className="w-12 h-12 text-gray-400" />
-                )}
-              </div>
-              <label className="absolute bottom-0 right-0 bg-green-500 rounded-full p-1 cursor-pointer hover:bg-green-600 transition-colors">
-                <AiOutlineEdit className="w-4 h-4 text-white" />
-                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-              </label>
+            <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
+              <AiOutlineUser className="w-12 h-12 text-gray-400" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{userData.CName}</h1>

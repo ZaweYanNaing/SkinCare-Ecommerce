@@ -4,10 +4,11 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
-$host = 'localhost';
+// Docker configuration
+$host = 'db'; // Docker service name
 $dbname = 'skincare_db';
-$username = 'root';
-$password = '';
+$username = 'php_docker';
+$password = 'password';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
