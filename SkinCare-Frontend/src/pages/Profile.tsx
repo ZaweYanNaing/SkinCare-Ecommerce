@@ -154,9 +154,6 @@ function Profile() {
 
   const fetchUserOrders = async () => {
     try {
-     
-      
-
       try {
         // Try different possible backend URLs (Docker setup)
         const possibleUrls = [
@@ -190,7 +187,6 @@ function Profile() {
         }
       } catch (apiError) {
         console.log('backend not available');
-        
       }
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -323,8 +319,6 @@ function Profile() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-
         {/* Header */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6 md:flex justify-between items-center">
           <div className="flex items-center space-x-6 ">
@@ -339,16 +333,15 @@ function Profile() {
           </div>
 
           {/* Go Home Button */}
-        <div className="my-8">
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-md"
-          >
-            <AiOutlineHome className="mr-2" />
-            Go Home
-          </button>
-        </div>
-
+          <div className="my-8">
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-md"
+            >
+              <AiOutlineHome className="mr-2" />
+              Go Home
+            </button>
+          </div>
         </div>
 
         {/* Navigation Tabs */}
@@ -534,8 +527,6 @@ function Profile() {
                         placeholder="Select start date"
                         className="w-full sm:w-48"
                       />
-
-                      
 
                       <DatePicker
                         date={dateFilter.endDate}
