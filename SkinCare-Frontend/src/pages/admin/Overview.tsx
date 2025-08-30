@@ -73,11 +73,11 @@ function Overview() {
         })}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        <div className="lg:col-span-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-8">
+        <div className="lg:col-span-4 ">
           <OverviewChart />
         </div>
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-4">
           <RecentSales />
         </div>
       </div>

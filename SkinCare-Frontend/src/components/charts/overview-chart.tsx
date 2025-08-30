@@ -1,42 +1,97 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 
-const chartData = [
-  { product: 'Toner', value: 100, color: '#ef4444' },
-  { product: 'Serum', value: 80, color: '#10b981' },
-  { product: 'Scrub', value: 60, color: '#3b82f6' },
-  { product: 'Lotion', value: 70, color: '#f59e0b' },
-  { product: 'Cream', value: 40, color: '#ec4899' },
-];
+
 
 export function OverviewChart() {
-  const maxValue = Math.max(...chartData.map(item => item.value));
 
+
+  const productSalesData = [
+    {
+      product: 'Toner',
+      sales: 850,
+      fill: 'var(--color-toner)',
+    },
+    {
+      product: 'Serum',
+      sales: 720,
+      fill: 'var(--color-serum)',
+    },
+    {
+      product: 'Scrub',
+      sales: 650,
+      fill: 'var(--color-scrub)',
+    },
+    {
+      product: 'Lotion',
+      sales: 580,
+      fill: 'var(--color-lotion)',
+    },
+    {
+      product: 'Cream',
+      sales: 420,
+      fill: 'var(--color-cream)',
+    },
+  ];
+
+  const chartConfig = {
+    sales: {
+      label: 'Sales',
+    },
+    toner: {
+      label: 'Toner',
+      color: 'var(--chart-1)',
+    },
+    serum: {
+      label: 'Serum',
+      color: 'var(--chart-2)',
+    },
+    scrub: {
+      label: 'Scrub',
+      color: 'var(--chart-3)',
+    },
+    lotion: {
+      label: 'Lotion',
+      color: 'var(--chart-4)',
+    },
+    cream: {
+      label: 'Cream',
+      color: 'var(--chart-5)',
+    },
+  } satisfies ChartConfig;
+  
   return (
-    <Card>
+    <Card className="h-105 w-full">
       <CardHeader>
         <CardTitle>Sales data for top skincare products</CardTitle>
+        <CardDescription>Product performance overview</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {chartData.map((item, index) => (
-            <div key={index} className="flex items-center gap-4">
-              <div className="w-16 text-sm text-gray-600">{item.product}</div>
-              <div className="flex-1">
-                <div className="h-8 bg-gray-100 rounded-md overflow-hidden">
-                  <div
-                    className="h-full rounded-md transition-all duration-300"
-                    style={{
-                      width: `${(item.value / maxValue) * 100}%`,
-                      backgroundColor: item.color,
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+      <CardContent className="flex-1">
+        <ChartContainer config={chartConfig} className="h-full">
+                      <BarChart
+                        accessibilityLayer
+                        data={productSalesData}
+                        layout="vertical"
+                        margin={{
+                          left: 0,
+                        }}
+                      >
+                        <YAxis
+                          dataKey="product"
+                          type="category"
+                          tickLine={false}
+                          tickMargin={10}
+                          axisLine={false}
+                          tickFormatter={(value) => chartConfig[value.toLowerCase() as keyof typeof chartConfig]?.label}
+                        />
+                        <XAxis dataKey="sales" type="number" hide />
+                        <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                        <Bar dataKey="sales" layout="vertical" radius={5} />
+          </BarChart>
+        </ChartContainer>
       </CardContent>
     </Card>
   );

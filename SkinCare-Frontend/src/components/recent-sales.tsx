@@ -35,7 +35,7 @@ const salesData = [
 
 export function RecentSales() {
   return (
-    <Card>
+    <Card className='h-105'>
       <CardHeader>
         <CardTitle>Ranking of best performing products</CardTitle>
       </CardHeader>
