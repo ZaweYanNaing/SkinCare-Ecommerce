@@ -1,39 +1,50 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useEffect, useState } from 'react';
 
-const salesData = [
-  {
-    rank: 1,
-    orders: 80,
-    amount: '$2,200',
-    product: 'Hydrating Toner'
-  },
-  {
-    rank: 2,
-    orders: 50,
-    amount: '$1,600',
-    product: 'Cleansing Serum'
-  },
-  {
-    rank: 3,
-    orders: 60,
-    amount: '$1,500',
-    product: 'Anti-Aging Scrub'
-  },
-  {
-    rank: 4,
-    orders: 45,
-    amount: '$1,300',
-    product: 'Sunscreen Lotion'
-  },
-  {
-    rank: 5,
-    orders: 34,
-    amount: '$1000',
-    product: 'Moisturizing Cream'
-  }
-];
+interface SalesData {
+  rank: number;
+  orders: number;
+  amount: string;
+  product: string;
+}
 
 export function RecentSales() {
+  const [salesData, setSalesData] = useState<SalesData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTopProducts();
+  }, []);
+
+  const fetchTopProducts = async () => {
+    try {
+      const response = await fetch('http://localhost/admin/top-products.php');
+      const data = await response.json();
+      
+      if (data.success) {
+        setSalesData(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching top products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  if (loading) {
+    return (
+      <Card className='h-105'>
+        <CardHeader>
+          <CardTitle>Ranking of best performing products</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-64">
+            <div>Loading top products...</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className='h-105'>
       <CardHeader>

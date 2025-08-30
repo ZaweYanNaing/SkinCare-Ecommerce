@@ -1,11 +1,10 @@
-
 import { OverviewChart } from '@/components/charts/overview-chart';
 import { RecentSales } from '@/components/recent-sales';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Activity, CreditCard, DollarSign, Download, Users } from 'lucide-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronDownIcon } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import {
@@ -14,31 +13,65 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
+interface OverviewStats {
+  totalSales: string;
+  totalOrders: number;
+  bestSellingProduct: string;
+  activeCustomers: number;
+}
+
 function Overview() {
+  const [stats, setStats] = useState<OverviewStats>({
+    totalSales: '0',
+    totalOrders: 0,
+    bestSellingProduct: 'N/A',
+    activeCustomers: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = React.useState(false)
+  const [date, setDate] = React.useState<Date | undefined>(undefined)
+
+  useEffect(() => {
+    fetchOverviewStats();
+  }, []);
+
+  const fetchOverviewStats = async () => {
+    try {
+      const response = await fetch('http://localhost/admin/overview-stats.php');
+      const data = await response.json();
+      
+      if (data.success) {
+        setStats(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching overview stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const reportCards = [
     {
       title: 'Total Sales',
-      value: '12,000$',
+      value: loading ? 'Loading...' : `$${stats.totalSales}`,
       icon: DollarSign,
     },
     {
       title: 'Total Orders',
-      value: '5730',
+      value: loading ? 'Loading...' : stats.totalOrders.toString(),
       icon: Users,
     },
     {
       title: 'Best Selling Product',
-      value: 'Toner',
+      value: loading ? 'Loading...' : stats.bestSellingProduct,
       icon: CreditCard,
     },
     {
-      title: 'Active now',
-      value: '573',
+      title: 'Active Customers',
+      value: loading ? 'Loading...' : stats.activeCustomers.toString(),
       icon: Activity,
     },
   ];
-  const [open, setOpen] = React.useState(false)
-  const [date, setDate] = React.useState<Date | undefined>(undefined)
 
   return (
     <div className="w-full max-w-7xl mx-auto p-6">
@@ -82,7 +115,6 @@ function Overview() {
         </PopoverContent>
       </Popover>
          <Button>
-         
           <Download />
           Export
          </Button>

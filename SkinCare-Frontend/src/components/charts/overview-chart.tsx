@@ -2,94 +2,98 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, XAxis, YAxis } from 'recharts';
+import { useEffect, useState } from 'react';
 
-
+interface SalesData {
+  category: string;
+  sales: number;
+  revenue: number;
+}
 
 export function OverviewChart() {
+  const [salesData, setSalesData] = useState<SalesData[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    fetchSalesData();
+  }, []);
 
-  const productSalesData = [
-    {
-      product: 'Toner',
-      sales: 850,
-      fill: 'var(--color-toner)',
-    },
-    {
-      product: 'Serum',
-      sales: 720,
-      fill: 'var(--color-serum)',
-    },
-    {
-      product: 'Scrub',
-      sales: 650,
-      fill: 'var(--color-scrub)',
-    },
-    {
-      product: 'Lotion',
-      sales: 580,
-      fill: 'var(--color-lotion)',
-    },
-    {
-      product: 'Cream',
-      sales: 420,
-      fill: 'var(--color-cream)',
-    },
-  ];
+  const fetchSalesData = async () => {
+    try {
+      const response = await fetch('http://localhost/admin/sales-by-category.php');
+      const data = await response.json();
+      
+      if (data.success) {
+        setSalesData(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching sales data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const productSalesData = salesData.map((item, index) => ({
+    product: item.category,
+    sales: item.sales,
+    fill: `var(--chart-${(index % 5) + 1})`,
+  }));
 
   const chartConfig = {
     sales: {
       label: 'Sales',
     },
-    toner: {
-      label: 'Toner',
-      color: 'var(--chart-1)',
-    },
-    serum: {
-      label: 'Serum',
-      color: 'var(--chart-2)',
-    },
-    scrub: {
-      label: 'Scrub',
-      color: 'var(--chart-3)',
-    },
-    lotion: {
-      label: 'Lotion',
-      color: 'var(--chart-4)',
-    },
-    cream: {
-      label: 'Cream',
-      color: 'var(--chart-5)',
-    },
+    ...salesData.reduce((acc, item, index) => {
+      acc[item.category.toLowerCase().replace(/\s+/g, '')] = {
+        label: item.category,
+        color: `var(--chart-${(index % 5) + 1})`,
+      };
+      return acc;
+    }, {} as Record<string, { label: string; color: string }>)
   } satisfies ChartConfig;
   
+  if (loading) {
+    return (
+      <Card className="h-105 w-full">
+        <CardHeader>
+          <CardTitle>Sales data by category</CardTitle>
+          <CardDescription>Loading...</CardDescription>
+        </CardHeader>
+        <CardContent className="flex-1 flex items-center justify-center">
+          <div>Loading chart data...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="h-105 w-full">
       <CardHeader>
-        <CardTitle>Sales data for top skincare products</CardTitle>
-        <CardDescription>Product performance overview</CardDescription>
+        <CardTitle>Sales data by category</CardTitle>
+        <CardDescription>Product performance overview by category</CardDescription>
       </CardHeader>
       <CardContent className="flex-1">
         <ChartContainer config={chartConfig} className="h-full">
-                      <BarChart
-                        accessibilityLayer
-                        data={productSalesData}
-                        layout="vertical"
-                        margin={{
-                          left: 0,
-                        }}
-                      >
-                        <YAxis
-                          dataKey="product"
-                          type="category"
-                          tickLine={false}
-                          tickMargin={10}
-                          axisLine={false}
-                          tickFormatter={(value) => chartConfig[value.toLowerCase() as keyof typeof chartConfig]?.label}
-                        />
-                        <XAxis dataKey="sales" type="number" hide />
-                        <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-                        <Bar dataKey="sales" layout="vertical" radius={5} />
+          <BarChart
+            accessibilityLayer
+            data={productSalesData}
+            layout="vertical"
+            margin={{
+              left: 0,
+            }}
+          >
+            <YAxis
+              dataKey="product"
+              type="category"
+              tickLine={false}
+              tickMargin={10}
+              axisLine={false}
+              tickFormatter={(value) => value}
+            />
+            <XAxis dataKey="sales" type="number" hide />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+            <Bar dataKey="sales" layout="vertical" radius={5} />
           </BarChart>
         </ChartContainer>
       </CardContent>
