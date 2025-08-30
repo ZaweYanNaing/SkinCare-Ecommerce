@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { OverviewChart } from '@/components/charts/overview-chart';
 import { RecentSales } from '@/components/recent-sales';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
