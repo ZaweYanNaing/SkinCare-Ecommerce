@@ -11,6 +11,7 @@ import {
 import { Download, FileText, File, BarChart3 } from 'lucide-react';
 import { exportComprehensiveCSV, exportOverviewData, type ExportData, ExportFormat } from '@/utils/exportUtils';
 import { exportAdvancedPDF, downloadAdvancedPDF } from '@/utils/advancedPdfExport';
+import { downloadPDFWithCharts } from '@/utils/pdfWithCharts';
 
 interface EnhancedExportDialogProps {
   disabled?: boolean;
@@ -41,9 +42,12 @@ export function EnhancedExportDialog({ disabled = false }: EnhancedExportDialogP
             break;
             
           case ExportFormat.PDF:
-          case ExportFormat.PDF_WITH_CHARTS:
             const pdf = exportAdvancedPDF(exportData);
             downloadAdvancedPDF(pdf, 'skincare-overview-report');
+            break;
+            
+          case ExportFormat.PDF_WITH_CHARTS:
+            await downloadPDFWithCharts(exportData, 'skincare-overview-report');
             break;
         }
         
@@ -191,7 +195,10 @@ export function EnhancedExportDialog({ disabled = false }: EnhancedExportDialogP
             Cancel
           </Button>
           <Button onClick={handleExport} disabled={exporting}>
-            {exporting ? 'Generating...' : 'Export Report'}
+            {exporting 
+              ? (exportFormat === ExportFormat.PDF_WITH_CHARTS ? 'Capturing Charts...' : 'Generating...') 
+              : 'Export Report'
+            }
           </Button>
         </div>
       </DialogContent>
