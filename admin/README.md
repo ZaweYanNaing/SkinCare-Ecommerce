@@ -66,7 +66,33 @@ This directory contains the backend API endpoints for the admin dashboard.
 }
 ```
 
-### 4. Test Endpoint
+### 4. Export Overview Data
+**URL:** `/admin/export-overview.php`  
+**Method:** GET  
+**Description:** Returns comprehensive data for export including all overview statistics, sales data, top products, recent orders, and monthly trends.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "overview_stats": {
+      "total_sales": 123456.78,
+      "total_orders": 123,
+      "best_selling_product": "Product Name",
+      "best_selling_quantity": 45,
+      "active_customers": 67,
+      "export_date": "2025-01-01 12:00:00"
+    },
+    "sales_by_category": [...],
+    "top_products": [...],
+    "recent_orders": [...],
+    "monthly_sales_trend": [...]
+  }
+}
+```
+
+### 5. Test Endpoint
 **URL:** `/admin/test.php`  
 **Method:** GET  
 **Description:** Tests database connectivity and returns product count.

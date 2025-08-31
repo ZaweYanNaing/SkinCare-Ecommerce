@@ -1,9 +1,9 @@
 import { OverviewChart } from '@/components/charts/overview-chart';
 import { RecentSales } from '@/components/recent-sales';
+import { EnhancedExportDialog } from '@/components/EnhancedExportDialog';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Activity, CreditCard, DollarSign, Download, Users } from 'lucide-react';
+import { Activity, CreditCard, DollarSign, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 
@@ -84,11 +84,8 @@ function Overview() {
           </Breadcrumb>
         </div>
         <div className="flex items-center gap-3">
-        
-         <Button>
-          <Download />
-          Export
-         </Button>
+          
+          <EnhancedExportDialog disabled={loading} />
         </div>
       </div>
 

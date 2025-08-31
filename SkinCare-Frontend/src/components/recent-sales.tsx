@@ -46,7 +46,7 @@ export function RecentSales() {
   }
 
   return (
-    <Card className='h-105'>
+    <Card className='h-105' data-chart="top-products">
       <CardHeader>
         <CardTitle>Ranking of best performing products</CardTitle>
       </CardHeader>

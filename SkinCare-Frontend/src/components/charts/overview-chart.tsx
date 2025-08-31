@@ -68,7 +68,7 @@ export function OverviewChart() {
   }
 
   return (
-    <Card className="h-105 w-full">
+    <Card className="h-105 w-full" data-chart="sales-by-category">
       <CardHeader>
         <CardTitle>Sales data by category</CardTitle>
         <CardDescription>Product performance overview by category</CardDescription>
