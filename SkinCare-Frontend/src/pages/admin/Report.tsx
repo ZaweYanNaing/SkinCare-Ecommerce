@@ -1,8 +1,17 @@
-import React from 'react';
+import  { useState } from 'react';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { ChevronDownIcon } from "lucide-react"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Button } from '@/components/ui/button';
+
 
 const data = [
   { month: 'Jan', sales: 4000, orders: 240 },
@@ -14,9 +23,11 @@ const data = [
 ];
 
 function Report() {
+  const [open, setOpen] = useState(false)
+const [date, setDate] = useState<Date | undefined>(undefined)
   return (
     <div className="w-full max-w-7xl mx-auto p-6">
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex items-center justify-between ">
         <div className="flex items-center">
           <Separator orientation="vertical" className="mr-4 h-6" />
           <Breadcrumb>
@@ -31,6 +42,29 @@ function Report() {
             </BreadcrumbList>
           </Breadcrumb>
         </div>
+        <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            id="date"
+            className="w-35 justify-between font-normal"
+          >
+            {date ? date.toLocaleDateString() : "Select date"}
+            <ChevronDownIcon />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+          <Calendar
+            mode="single"
+            selected={date}
+            captionLayout="dropdown"
+            onSelect={(date) => {
+              setDate(date)
+              setOpen(false)
+            }}
+          />
+        </PopoverContent>
+      </Popover>
       </div>
 
       <div className="space-y-6">

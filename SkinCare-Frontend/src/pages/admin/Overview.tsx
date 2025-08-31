@@ -4,14 +4,8 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Activity, CreditCard, DollarSign, Download, Users } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
-import { ChevronDownIcon } from "lucide-react"
-import { Calendar } from "@/components/ui/calendar"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { useEffect, useState } from 'react';
+
 
 interface OverviewStats {
   totalSales: string;
@@ -28,8 +22,7 @@ function Overview() {
     activeCustomers: 0
   });
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = React.useState(false)
-  const [date, setDate] = React.useState<Date | undefined>(undefined)
+
 
   useEffect(() => {
     fetchOverviewStats();
@@ -91,29 +84,7 @@ function Overview() {
           </Breadcrumb>
         </div>
         <div className="flex items-center gap-3">
-        <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            id="date"
-            className="w-35 justify-between font-normal"
-          >
-            {date ? date.toLocaleDateString() : "Select date"}
-            <ChevronDownIcon />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={date}
-            captionLayout="dropdown"
-            onSelect={(date) => {
-              setDate(date)
-              setOpen(false)
-            }}
-          />
-        </PopoverContent>
-      </Popover>
+        
          <Button>
           <Download />
           Export
