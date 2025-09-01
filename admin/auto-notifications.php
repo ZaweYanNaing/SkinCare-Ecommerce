@@ -11,6 +11,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once '../config/database.php';
 
 try {
+    // Clean up duplicate notifications first (keep only the most recent for each product/order)
+    $cleanupQuery = "
+        DELETE n1 FROM Notification n1
+        INNER JOIN Notification n2 
+        WHERE n1.NotiID < n2.NotiID 
+        AND n1.Type = n2.Type 
+        AND n1.Message = n2.Message
+        AND n1.DateSent >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+    ";
+    $pdo->exec($cleanupQuery);
+    
     // Check for new orders (orders placed in last 24 hours that don't have notifications yet)
     $newOrdersQuery = "
         SELECT 
@@ -59,9 +70,9 @@ try {
         AND Stock > 0
         AND NOT EXISTS (
             SELECT 1 FROM Notification n 
-            WHERE n.Message LIKE CONCAT('%', Product.Name, '%low stock%') 
-            AND n.DateSent >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+            WHERE n.Message LIKE CONCAT('%', Product.Name, '%running low in stock%') 
             AND n.Type = 'alert'
+            AND n.DateSent >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
         )
         ORDER BY Stock ASC
     ";
@@ -91,9 +102,9 @@ try {
         WHERE Stock = 0
         AND NOT EXISTS (
             SELECT 1 FROM Notification n 
-            WHERE n.Message LIKE CONCAT('%', Product.Name, '%out of stock%') 
-            AND n.DateSent >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+            WHERE n.Message LIKE CONCAT('%', Product.Name, '%completely out of stock%') 
             AND n.Type = 'alert'
+            AND n.DateSent >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
         )
     ";
     

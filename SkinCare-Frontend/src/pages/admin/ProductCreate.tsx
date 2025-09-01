@@ -8,14 +8,14 @@ import { Label } from '@/components/ui/label';
 
 function ProductCreate() {
   return (
-    <div className="my-5.5 min-w-275">
+    <div className="w-full max-w-7xl mx-auto p-6">
       <div className="mb-12 flex items-center justify-between">
         <div className="flex items-center">
           <Separator orientation="vertical" className="mr-4 data-[orientation=vertical]:h-4" />
           <Breadcrumb>
             <BreadcrumbList className="text-[1rem]">
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
+                <BreadcrumbLink href="#">Product</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
