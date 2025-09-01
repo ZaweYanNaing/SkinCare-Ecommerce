@@ -34,7 +34,7 @@ function Notification() {
   ];
 
   return (
-    <div className="my-5.5 min-w-275">
+    <div className="w-full max-w-7xl mx-auto p-6">
       <div className="mb-12 flex items-center justify-between">
         <div className="flex items-center">
           <Separator orientation="vertical" className="mr-4 data-[orientation=vertical]:h-4" />
