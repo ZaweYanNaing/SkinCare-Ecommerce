@@ -3,6 +3,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { EnhancedExportDialog } from '@/components/EnhancedExportDialog';
 
 interface MonthlySalesData {
   month: string;
@@ -16,6 +17,7 @@ interface FinanceData {
 }
 
 interface TransactionData {
+  orders: number;
   no: number;
   customer: string;
   amount: string;
@@ -36,42 +38,41 @@ function Report() {
   const fetchReportData = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch monthly sales data
       const monthlySalesResponse = await fetch('http://localhost/admin/monthly-sales-report.php');
       const monthlySalesResult = await monthlySalesResponse.json();
-      
+
       // Fetch daily finance data
       const financeResponse = await fetch('http://localhost/admin/daily-finance-report.php');
       const financeResult = await financeResponse.json();
-      
+
       // Fetch transactions data
       const transactionsResponse = await fetch('http://localhost/admin/transactions-report.php');
       const transactionsResult = await transactionsResponse.json();
-      
+
       // Debug logging
       console.log('Monthly Sales Result:', monthlySalesResult);
       console.log('Finance Result:', financeResult);
       console.log('Transactions Result:', transactionsResult);
-      
+
       if (monthlySalesResult.success) {
         setMonthlySalesData(monthlySalesResult.data);
       } else {
         console.error('Monthly sales error:', monthlySalesResult.message);
       }
-      
+
       if (financeResult.success) {
         setFinanceData(financeResult.data);
       } else {
         console.error('Finance error:', financeResult.message);
       }
-      
+
       if (transactionsResult.success) {
         setTransactionsData(transactionsResult.data);
       } else {
         console.error('Transactions error:', transactionsResult.message);
       }
-      
     } catch (error) {
       console.error('Error fetching report data:', error);
     } finally {
@@ -95,7 +96,9 @@ function Report() {
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-
+        <div className="flex items-center gap-3">
+          <EnhancedExportDialog disabled={loading} exportEndpoint="http://localhost/admin/export-report.php" filename="report_data" />
+        </div>
       </div>
 
       <div className="space-y-6">
@@ -152,38 +155,37 @@ function Report() {
             </CardContent>
           </Card>
 
-          {/* Transactions Table */}
+          {/* Top Customers Table */}
           <Card>
             <CardHeader>
-              <CardTitle>Transactions</CardTitle>
+              <CardTitle>Top 5 Customers</CardTitle>
+              <CardDescription>Customers with highest total purchase amounts</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="grid grid-cols-4 gap-4 text-sm font-medium text-gray-600 border-b pb-2 flex-1">
-                    <div>No.</div>
+                    <div>Rank</div>
                     <div>Customer</div>
-                    <div>Amount</div>
-                    <div>Payment</div>
+                    <div>Total Amount</div>
+                    <div>Orders</div>
                   </div>
                 </div>
                 {loading ? (
                   <div className="flex items-center justify-center py-8">
-                    <div>Loading transactions...</div>
+                    <div>Loading top customers...</div>
                   </div>
                 ) : transactionsData.length > 0 ? (
                   transactionsData.map((transaction) => (
                     <div key={transaction.no} className="grid grid-cols-4 gap-4 text-sm py-2">
-                      <div className="font-medium">{transaction.no}</div>
+                      <div className="font-medium">#{transaction.no}</div>
                       <div className="text-gray-600">{transaction.customer}</div>
-                      <div className="font-medium">{transaction.amount}</div>
-                      <div className="text-gray-600">{transaction.payment}</div>
+                      <div className="font-medium text-green-600">{transaction.amount}</div>
+                      <div className="text-gray-600">{transaction.orders} orders</div>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    No recent transactions
-                  </div>
+                  <div className="text-center py-8 text-gray-500">No customer data available</div>
                 )}
               </div>
             </CardContent>

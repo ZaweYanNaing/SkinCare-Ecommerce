@@ -15,9 +15,15 @@ import { downloadPDFWithCharts } from '@/utils/pdfWithCharts';
 
 interface EnhancedExportDialogProps {
   disabled?: boolean;
+  exportEndpoint?: string;
+  filename?: string;
 }
 
-export function EnhancedExportDialog({ disabled = false }: EnhancedExportDialogProps) {
+export function EnhancedExportDialog({ 
+  disabled = false, 
+  exportEndpoint = 'http://localhost/admin/export-overview.php',
+  filename = 'skincare-overview-report'
+}: EnhancedExportDialogProps) {
   const [open, setOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [exportFormat, setExportFormat] = useState<ExportFormat>(ExportFormat.PDF);
@@ -26,7 +32,7 @@ export function EnhancedExportDialog({ disabled = false }: EnhancedExportDialogP
   const handleExport = async () => {
     setExporting(true);
     try {
-      const response = await fetch('http://localhost/admin/export-overview.php');
+      const response = await fetch(exportEndpoint);
       const data = await response.json();
       
       if (data.success) {
@@ -43,11 +49,11 @@ export function EnhancedExportDialog({ disabled = false }: EnhancedExportDialogP
             
           case ExportFormat.PDF:
             const pdf = exportAdvancedPDF(exportData);
-            downloadAdvancedPDF(pdf, 'skincare-overview-report');
+            downloadAdvancedPDF(pdf, filename);
             break;
             
           case ExportFormat.PDF_WITH_CHARTS:
-            await downloadPDFWithCharts(exportData, 'skincare-overview-report');
+            await downloadPDFWithCharts(exportData, filename);
             break;
         }
         
