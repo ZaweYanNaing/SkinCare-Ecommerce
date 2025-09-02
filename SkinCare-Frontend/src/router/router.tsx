@@ -10,6 +10,8 @@ import SignIn from '../pages/auth/SignIn';
 import SignUp from '../pages/auth/SignUp';
 import Profile from '../pages/Profile';
 import AccManagement from '@/pages/admin/AccManagement';
+import CustomerAccounts from '@/pages/admin/CustomerAccounts';
+import AdminAccounts from '@/pages/admin/AdminAccounts';
 import Notification from '@/pages/admin/Notification';
 import Overview from '@/pages/admin/Overview';
 import ProductCreate from '@/pages/admin/ProductCreate';
@@ -51,11 +53,19 @@ export const router = createBrowserRouter([
         element: <AccManagement />,
       },
       {
+        path: 'customers',
+        element: <CustomerAccounts />,
+      },
+      {
+        path: 'admins',
+        element: <AdminAccounts />,
+      },
+      {
         path: 'productCreate',
         element: <ProductCreate />,
       },
       {
-        path: 'productEdit',
+        path: 'products',
         element: <ProductEdit />,
       },
       {

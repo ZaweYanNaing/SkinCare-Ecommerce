@@ -40,7 +40,7 @@ const data = {
       icon: UserPen,
       items: [
         {
-          title: 'All Accounts',
+          title: 'All Acc',
           url: '/admin/accManange',
         },
       ],
