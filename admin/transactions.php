@@ -115,17 +115,14 @@ function handleGetTransactions($pdo) {
             GROUP BY o.OrderID, o.orderDate, o.status, c.CID, c.CName, c.CEmail, c.CPhone, 
                      p.PaymentID, p.Amount, p.paymentMethod, p.PayDate, p.tranID
             ORDER BY o.orderDate DESC
-            LIMIT ? OFFSET ?
+            LIMIT {$limit} OFFSET {$offset}
         ";
-        
-        $params[] = $limit;
-        $params[] = $offset;
         
         $stmt = $pdo->prepare($query);
         $stmt->execute($params);
         $transactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Get summary statistics
+        // Get summary statistics - use same calculation as overview stats
         $statsQuery = "
             SELECT 
                 COUNT(DISTINCT o.OrderID) as totalOrders,
@@ -136,11 +133,12 @@ function handleGetTransactions($pdo) {
                 COUNT(DISTINCT CASE WHEN o.status = 'delivered' THEN o.OrderID END) as deliveredOrders,
                 COUNT(DISTINCT CASE WHEN o.status = 'cancelled' THEN o.OrderID END) as cancelledOrders
             FROM `Order` o
+            LEFT JOIN Customer c ON o.customerID = c.CID
             LEFT JOIN Payment p ON o.OrderID = p.OrderID
             $whereClause
         ";
         
-        $statsParams = array_slice($params, 0, count($params) - 2); // Remove limit and offset
+        $statsParams = $params; // Use the same parameters for stats query
         $statsStmt = $pdo->prepare($statsQuery);
         $statsStmt->execute($statsParams);
         $stats = $statsStmt->fetch(PDO::FETCH_ASSOC);

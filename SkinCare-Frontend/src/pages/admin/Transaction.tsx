@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Search, Eye, Filter, Download, Calendar, DollarSign, ShoppingCart, TrendingUp } from 'lucide-react';
+import { Search, Eye, Filter, Download, Calendar, DollarSign, ShoppingCart, TrendingUp, RefreshCw, Truck, X } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 interface Transaction {
@@ -100,6 +100,8 @@ function Transaction() {
   const [isStatusUpdateDialogOpen, setIsStatusUpdateDialogOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [newStatus, setNewStatus] = useState('');
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [exportFormat, setExportFormat] = useState('csv');
 
   const statusOptions = [
     { value: 'all', label: 'All Status' },
@@ -111,16 +113,35 @@ function Transaction() {
   ];
 
   useEffect(() => {
-    fetchTransactions();
+    const timeoutId = setTimeout(() => {
+      fetchTransactions();
+    }, 300); // Debounce search by 300ms
+
+    return () => clearTimeout(timeoutId);
   }, [currentPage, searchTerm, statusFilter, dateFrom, dateTo]);
+
+  // Reset to page 1 when filters change (except pagination)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, dateFrom, dateTo]);
 
   const fetchTransactions = async () => {
     try {
       setLoading(true);
       console.log('Fetching transactions...');
 
-      // Use simple API first to test
-      const response = await fetch('http://localhost/admin/transactions-simple.php');
+      // Build query parameters
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: '10',
+        ...(searchTerm && { search: searchTerm }),
+        ...(statusFilter !== 'all' && { status: statusFilter }),
+        ...(dateFrom && { dateFrom }),
+        ...(dateTo && { dateTo }),
+      });
+
+      // Use the full transactions API with filtering
+      const response = await fetch(`http://localhost/admin/transactions.php?${params}`);
       console.log('Response status:', response.status);
 
       if (!response.ok) {
@@ -145,7 +166,7 @@ function Transaction() {
         setTransactions(processedTransactions);
         setStats(data.stats);
         setTotalPages(data.pagination.totalPages);
-        toast.success('Transactions loaded successfully');
+        
       } else {
         console.error('API returned error:', data.message);
         toast.error('Failed to fetch transactions: ' + (data.message || 'Unknown error'));
@@ -194,7 +215,7 @@ function Transaction() {
       const data = await response.json();
 
       if (data.success) {
-        toast.success('Order status updated successfully');
+       
         setIsStatusUpdateDialogOpen(false);
         setSelectedOrderId(null);
         setNewStatus('');
@@ -208,20 +229,137 @@ function Transaction() {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      // Build query parameters for export
+      const params = new URLSearchParams({
+        format: exportFormat,
+        ...(searchTerm && { search: searchTerm }),
+        ...(statusFilter !== 'all' && { status: statusFilter }),
+        ...(dateFrom && { dateFrom }),
+        ...(dateTo && { dateTo }),
+      });
+
+      const response = await fetch(`http://localhost/admin/export-transactions.php?${params}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      if (exportFormat === 'csv') {
+        // Handle CSV download
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `transactions-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        // Handle JSON response for Excel/PDF
+        const data = await response.json();
+        if (data.success) {
+          // For now, we'll create a simple CSV for Excel/PDF
+          // In a real implementation, you'd use libraries like SheetJS for Excel or jsPDF for PDF
+          const csvContent = convertToCSV(data.data);
+          const blob = new Blob([csvContent], { type: 'text/csv' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `transactions-${new Date().toISOString().split('T')[0]}.${exportFormat === 'excel' ? 'xlsx' : 'csv'}`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } else {
+          throw new Error(data.message || 'Export failed');
+        }
+      }
+
+      toast.success('Export completed successfully');
+      setIsExportDialogOpen(false);
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      toast.error('Error exporting data');
+    }
+  };
+
+  const convertToCSV = (data: any[]) => {
+    if (!data || data.length === 0) return '';
+    
+    const headers = [
+      'Order ID',
+      'Order Date',
+      'Status',
+      'Customer Name',
+      'Customer Email',
+      'Customer Phone',
+      'Customer Address',
+      'Payment Method',
+      'Transaction ID',
+      'Total Amount',
+      'Payment Date',
+      'Item Count',
+      'Items'
+    ];
+    
+    const csvRows = [headers.join(',')];
+    
+    data.forEach(row => {
+      const values = [
+        row.OrderID,
+        row.orderDate,
+        row.status,
+        `"${row.customerName || ''}"`,
+        `"${row.customerEmail || ''}"`,
+        `"${row.customerPhone || ''}"`,
+        `"${row.customerAddress || ''}"`,
+        row.paymentMethod,
+        row.tranID,
+        row.totalAmount,
+        row.PayDate,
+        row.itemCount,
+        `"${row.items || ''}"`
+      ];
+      csvRows.push(values.join(','));
+    });
+    
+    return csvRows.join('\n');
+  };
+
   const getStatusBadgeVariant = (status: string) => {
     switch (status.toLowerCase()) {
       case 'delivered':
-        return 'default';
+        return 'default'; // Green - Success
       case 'confirmed':
-        return 'secondary';
+        return 'secondary'; // Blue - Processing
       case 'shipped':
-        return 'outline';
+        return 'outline'; // Purple - In Transit
       case 'pending':
-        return 'secondary';
+        return 'secondary'; // Orange - Waiting
       case 'cancelled':
-        return 'destructive';
+        return 'destructive'; // Red - Failed
       default:
         return 'secondary';
+    }
+  };
+
+  const getStatusBadgeStyle = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'delivered':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'confirmed':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'shipped':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'pending':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
@@ -265,12 +403,17 @@ function Transaction() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Total Revenue
+                  {(searchTerm || statusFilter !== 'all' || dateFrom || dateTo) && (
+                    <span className="text-xs text-gray-500 ml-1">(filtered)</span>
+                  )}
+                </p>
                 <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.totalRevenue)}</p>
               </div>
               <DollarSign className="h-8 w-8 text-green-500" />
@@ -306,10 +449,46 @@ function Transaction() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
+                <p className="text-sm font-medium text-gray-600">Confirmed Orders</p>
+                <p className="text-2xl font-bold text-blue-600">{stats.confirmedOrders}</p>
+              </div>
+              <ShoppingCart className="h-8 w-8 text-blue-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Shipped Orders</p>
+                <p className="text-2xl font-bold text-purple-600">{stats.shippedOrders}</p>
+              </div>
+              <Truck className="h-8 w-8 text-purple-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
                 <p className="text-sm font-medium text-gray-600">Delivered Orders</p>
                 <p className="text-2xl font-bold text-green-600">{stats.deliveredOrders}</p>
               </div>
               <TrendingUp className="h-8 w-8 text-green-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Cancelled Orders</p>
+                <p className="text-2xl font-bold text-red-600">{stats.cancelledOrders}</p>
+              </div>
+              <X className="h-8 w-8 text-red-500" />
             </div>
           </CardContent>
         </Card>
@@ -318,10 +497,39 @@ function Transaction() {
       {/* Filters */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filters
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              Filters
+            </CardTitle>
+            {(searchTerm || statusFilter !== 'all' || dateFrom || dateTo) && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Active filters:</span>
+                <div className="flex gap-1">
+                  {searchTerm && (
+                    <Badge variant="secondary" className="text-xs">
+                      Search: {searchTerm}
+                    </Badge>
+                  )}
+                  {statusFilter !== 'all' && (
+                    <Badge variant="secondary" className="text-xs">
+                      Status: {statusFilter}
+                    </Badge>
+                  )}
+                  {dateFrom && (
+                    <Badge variant="secondary" className="text-xs">
+                      From: {dateFrom}
+                    </Badge>
+                  )}
+                  {dateTo && (
+                    <Badge variant="secondary" className="text-xs">
+                      To: {dateTo}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -370,7 +578,7 @@ function Transaction() {
               <Button
                 onClick={() => {
                   setSearchTerm('');
-                  setStatusFilter('');
+                  setStatusFilter('all');
                   setDateFrom('');
                   setDateTo('');
                   setCurrentPage(1);
@@ -393,16 +601,25 @@ function Transaction() {
               <CardTitle>Transaction History</CardTitle>
               <CardDescription>View and manage all customer transactions</CardDescription>
             </div>
-            <Button variant="outline">
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={fetchTransactions} variant="outline" size="sm" className="flex items-center gap-2">
+                <RefreshCw className="h-4 w-4" />
+                Refresh
+              </Button>
+              <Button onClick={() => setIsExportDialogOpen(true)} variant="outline" className="flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                Export
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <div>Loading transactions...</div>
+            <div className="flex items-center justify-center py-12">
+              <div className="flex flex-col items-center gap-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <div className="text-gray-600">Loading transactions...</div>
+              </div>
             </div>
           ) : (
             <>
@@ -442,7 +659,12 @@ function Transaction() {
                         <td className="p-3">{transaction.paymentMethod}</td>
                         <td className="p-3 text-sm text-gray-600">{formatDate(transaction.orderDate)}</td>
                         <td className="p-3">
-                          <Badge variant={getStatusBadgeVariant(transaction.status)}>{transaction.status}</Badge>
+                          <Badge 
+                            variant={getStatusBadgeVariant(transaction.status)}
+                            className={getStatusBadgeStyle(transaction.status)}
+                          >
+                            {transaction.status}
+                          </Badge>
                         </td>
                         <td className="p-3">
                           <div className="flex gap-2">
@@ -491,7 +713,38 @@ function Transaction() {
                 </div>
               )}
 
-              {transactions.length === 0 && <div className="text-center py-8 text-gray-500">No transactions found matching your criteria.</div>}
+              {transactions.length === 0 && (
+                <div className="text-center py-12">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                      <ShoppingCart className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900">No transactions found</h3>
+                      <p className="text-gray-500 mt-1">
+                        {searchTerm || statusFilter !== 'all' || dateFrom || dateTo
+                          ? 'No transactions match your current filters. Try adjusting your search criteria.'
+                          : 'No transactions have been recorded yet.'}
+                      </p>
+                    </div>
+                    {(searchTerm || statusFilter !== 'all' || dateFrom || dateTo) && (
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setSearchTerm('');
+                          setStatusFilter('all');
+                          setDateFrom('');
+                          setDateTo('');
+                          setCurrentPage(1);
+                        }}
+                        className="mt-2"
+                      >
+                        Clear Filters
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
             </>
           )}
         </CardContent>
@@ -524,7 +777,12 @@ function Transaction() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Status:</span>
-                      <Badge variant={getStatusBadgeVariant(selectedTransaction.order.status)}>{selectedTransaction.order.status}</Badge>
+                      <Badge 
+                        variant={getStatusBadgeVariant(selectedTransaction.order.status)}
+                        className={getStatusBadgeStyle(selectedTransaction.order.status)}
+                      >
+                        {selectedTransaction.order.status}
+                      </Badge>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Payment Method:</span>
@@ -666,6 +924,49 @@ function Transaction() {
               Cancel
             </Button>
             <Button onClick={handleStatusUpdate}>Update Status</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export Transactions</DialogTitle>
+            <DialogDescription>Choose the format to export transaction data</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="exportFormat">Export Format</Label>
+              <Select value={exportFormat} onValueChange={setExportFormat}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="excel">Excel</SelectItem>
+                  <SelectItem value="pdf">PDF</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="text-sm text-gray-600">
+              <p>Export will include:</p>
+              <ul className="list-disc list-inside mt-1 space-y-1">
+                <li>All transactions matching current filters</li>
+                <li>Customer information</li>
+                <li>Order details and payment information</li>
+                <li>Status and dates</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsExportDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleExport} className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              Export
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
