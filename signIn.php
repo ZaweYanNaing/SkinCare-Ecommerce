@@ -47,8 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // Check if user exists and password matches
-    $stmt = $con->prepare("SELECT * FROM Customer WHERE CEmail = ?");
+    // Check if user exists and get their status
+    $stmt = $con->prepare("SELECT CID, CEmail, CPass, Status FROM Customer WHERE CEmail = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -71,13 +71,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
+    // Check if user is banned
+    if ($user['Status'] === 'banned') {
+        echo json_encode([
+            "success" => false, 
+            "message" => "Your account has been banned. Please contact customer support for assistance.",
+            "error_code" => "ACCOUNT_BANNED"
+        ]);
+        $stmt->close();
+        $con->close();
+        exit();
+    }
+
+    // Check if user has warnings (optional - just inform them)
+    $loginMessage = "Login successful.";
+    if ($user['Status'] === 'warned') {
+        $loginMessage = "Login successful. Please note: Your account has received warnings. Please review our terms of service.";
+    }
+
     // Authentication successful
     echo json_encode([
         "success" => true, 
-        "message" => "Login successful.",
+        "message" => $loginMessage,
         "user" => [
             "id" => $user['CID'],
-            "email" => $user['CEmail']
+            "email" => $user['CEmail'],
+            "status" => $user['Status']
             // Don't include password in the response
         ]
     ]);

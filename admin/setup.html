@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin System Setup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .setup-section {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .setup-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .setup-description {
+            color: #6c757d;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .run-button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        .run-button:hover {
+            background: #45a049;
+        }
+        .run-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .run-all-button {
+            background: #007bff;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 30px auto;
+            font-weight: bold;
+        }
+        .run-all-button:hover {
+            background: #0056b3;
+        }
+        .results {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .message {
+            margin: 3px 0;
+            padding: 2px 0;
+            font-size: 14px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-pending { background-color: #ffc107; }
+        .status-success { background-color: #28a745; }
+        .status-error { background-color: #dc3545; }
+        .login-info {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .credential-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .credential-table th,
+        .credential-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .credential-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .role-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .role-super { background: #ffebee; color: #c62828; }
+        .role-manager { background: #e3f2fd; color: #1565c0; }
+        .role-staff { background: #e8f5e8; color: #2e7d32; }
+        .role-expert { background: #f3e5f5; color: #7b1fa2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Admin System Setup</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">
+            Complete setup for the SkinCare Admin Panel with role-based access control
+        </p>
+
+        <!-- Step 1: Customer Status Migration -->
+        <div class="setup-section">
+            <div class="setup-title">
+                <span class="status-indicator status-pending" id="status-customer"></span>
+                1. Customer Status System
+            </div>
+            <div class="setup-description">
+                Adds customer account status tracking (active, warned, banned) to enable customer management and ban functionality.
+            </div>
+            <button class="run-button" onclick="runMigration('customer')" id="btn-customer">
+                Run Customer Migration
+            </button>
+            <div id="results-customer" class="results"></div>
+        </div>
+
+        <!-- Step 2: Admin Role Migration -->
+        <div class="setup-section">
+            <div class="setup-title">
+                <span class="status-indicator status-pending" id="status-admin"></span>
+                2. Admin Role System
+            </div>
+            <div class="setup-description">
+                Updates admin table with role-based permissions (Super Admin, Manager, Staff, Expert) and adds proper ENUM constraints.
+            </div>
+            <button class="run-button" onclick="runMigration('admin')" id="btn-admin">
+                Run Admin Role Migration
+            </button>
+            <div id="results-admin" class="results"></div>
+        </div>
+
+        <!-- Step 3: Demo Admin Accounts -->
+        <div class="setup-section">
+            <div class="setup-title">
+                <span class="status-indicator status-pending" id="status-demo"></span>
+                3. Demo Admin Accounts
+            </div>
+            <div class="setup-description">
+                Creates demo admin accounts for each role type with default credentials for testing and development.
+            </div>
+            <button class="run-button" onclick="runMigration('demo')" id="btn-demo">
+                Create Demo Accounts
+            </button>
+            <div id="results-demo" class="results"></div>
+        </div>
+
+        <!-- Run All Button -->
+        <button class="run-all-button" onclick="runAllMigrations()" id="btn-all">
+            🎯 Run Complete Setup
+        </button>
+
+        <!-- Login Information -->
+        <div class="login-info">
+            <h3>🔑 Admin Login Information</h3>
+            <p>After setup completion, you can access the admin panel at:</p>
+            <p><strong>URL:</strong> <a href="/admin/login" target="_blank">http://localhost/admin/login</a></p>
+            
+            <table class="credential-table">
+                <thead>
+                    <tr>
+                        <th>Role</th>
+                        <th>Email</th>
+                        <th>Password</th>
+                        <th>Permissions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="role-badge role-super">Super Admin</span></td>
+                        <td>owner</td>
+                        <td>admin123</td>
+                        <td>Full system access</td>
+                    </tr>
+                    <tr>
+                        <td><span class="role-badge role-manager">Manager</span></td>
+                        <td>manager@skincare.com</td>
+                        <td>admin123</td>
+                        <td>Cannot create admins</td>
+                    </tr>
+                    <tr>
+                        <td><span class="role-badge role-staff">Staff</span></td>
+                        <td>staff@skincare.com</td>
+                        <td>admin123</td>
+                        <td>Limited access</td>
+                    </tr>
+                    <tr>
+                        <td><span class="role-badge role-expert">Expert</span></td>
+                        <td>expert@skincare.com</td>
+                        <td>admin123</td>
+                        <td>Specialized access</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const migrations = {
+            customer: 'migrate-customer-status.php',
+            admin: 'migrate-admin-roles.php',
+            demo: 'setup-demo-admins.php'
+        };
+
+        async function runMigration(type) {
+            const button = document.getElementById(`btn-${type}`);
+            const results = document.getElementById(`results-${type}`);
+            const status = document.getElementById(`status-${type}`);
+            
+            // Update UI
+            button.disabled = true;
+            button.textContent = '⏳ Running...';
+            results.style.display = 'none';
+            results.innerHTML = '';
+            status.className = 'status-indicator status-pending';
+            
+            try {
+                const response = await fetch(migrations[type]);
+                const data = await response.json();
+                
+                // Show results
+                results.style.display = 'block';
+                results.className = `results ${data.success ? 'success' : 'error'}`;
+                
+                if (data.messages && data.messages.length > 0) {
+                    data.messages.forEach(message => {
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = 'message';
+                        messageDiv.textContent = message;
+                        results.appendChild(messageDiv);
+                    });
+                }
+                
+                // Update status
+                if (data.success) {
+                    status.className = 'status-indicator status-success';
+                    button.textContent = '✅ Completed';
+                    button.style.background = '#28a745';
+                } else {
+                    status.className = 'status-indicator status-error';
+                    button.textContent = '❌ Failed';
+                    button.style.background = '#dc3545';
+                    button.disabled = false;
+                }
+                
+            } catch (error) {
+                console.error(`${type} migration error:`, error);
+                results.style.display = 'block';
+                results.className = 'results error';
+                results.innerHTML = `<div class="message">❌ Error: ${error.message}</div>`;
+                
+                status.className = 'status-indicator status-error';
+                button.textContent = '❌ Failed';
+                button.style.background = '#dc3545';
+                button.disabled = false;
+            }
+        }
+
+        async function runAllMigrations() {
+            const allButton = document.getElementById('btn-all');
+            allButton.disabled = true;
+            allButton.textContent = '⏳ Running Complete Setup...';
+            
+            try {
+                // Run migrations in sequence
+                await runMigration('customer');
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Small delay
+                
+                await runMigration('admin');
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Small delay
+                
+                await runMigration('demo');
+                
+                // Update button
+                allButton.textContent = '🎉 Setup Complete!';
+                allButton.style.background = '#28a745';
+                
+            } catch (error) {
+                allButton.textContent = '❌ Setup Failed';
+                allButton.style.background = '#dc3545';
+                allButton.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

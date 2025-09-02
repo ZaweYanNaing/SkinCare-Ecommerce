@@ -33,6 +33,26 @@ if (!isset($data['wishlistID'])) {
 
 $wishlistId = (int)$data['wishlistID'];
 
+// Check customer status before allowing wishlist removal
+if (isset($data['CustomerID'])) {
+    $customerId = (int)$data['CustomerID'];
+    $statusStmt = $con->prepare("SELECT Status FROM Customer WHERE CID = ?");
+    $statusStmt->bind_param("i", $customerId);
+    $statusStmt->execute();
+    $statusResult = $statusStmt->get_result();
+    $customer = $statusResult->fetch_assoc();
+    $statusStmt->close();
+
+    if ($customer && $customer['Status'] === 'banned') {
+        echo json_encode([
+            "success" => false, 
+            "message" => "Your account has been banned and cannot modify wishlist. Please contact customer support.",
+            "error_code" => "ACCOUNT_BANNED"
+        ]);
+        exit();
+    }
+}
+
 // ✅ Prepare and execute SQL
 $sql = "DELETE FROM WishList WHERE wishlistID = ?";
 $stmt = $con->prepare($sql);

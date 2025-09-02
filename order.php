@@ -55,6 +55,35 @@ function createOrder($con)
         $paymentInfo = $input['payment'];
         $status = $input['status'] ?? 'pending';
 
+        // Check customer status before allowing order creation
+        $customerStmt = $con->prepare("SELECT Status FROM Customer WHERE CID = ?");
+        if (!$customerStmt) {
+            throw new Exception("Prepare failed: " . $con->error);
+        }
+
+        $customerStmt->bind_param("i", $customerID);
+        if (!$customerStmt->execute()) {
+            throw new Exception("Execute failed: " . $customerStmt->error);
+        }
+
+        $customerResult = $customerStmt->get_result();
+        $customer = $customerResult->fetch_assoc();
+        $customerStmt->close();
+
+        if (!$customer) {
+            echo json_encode(['error' => 'Customer not found']);
+            return;
+        }
+
+        // Prevent banned customers from placing orders
+        if ($customer['Status'] === 'banned') {
+            echo json_encode([
+                'error' => 'Your account has been banned and cannot place orders. Please contact customer support.',
+                'error_code' => 'ACCOUNT_BANNED'
+            ]);
+            return;
+        }
+
         // Validate items array
         if (empty($items) || !is_array($items)) {
             echo json_encode(['error' => 'Items array is required and cannot be empty']);

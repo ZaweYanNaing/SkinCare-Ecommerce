@@ -48,6 +48,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
+    // Check customer status before allowing review submission
+    $statusStmt = $con->prepare("SELECT Status FROM Customer WHERE CID = ?");
+    $statusStmt->bind_param("i", $cid);
+    $statusStmt->execute();
+    $statusResult = $statusStmt->get_result();
+    $customer = $statusResult->fetch_assoc();
+    $statusStmt->close();
+
+    if (!$customer) {
+        echo json_encode(["success" => false, "message" => "Customer not found."]);
+        exit();
+    }
+
+    if ($customer['Status'] === 'banned') {
+        echo json_encode([
+            "success" => false, 
+            "message" => "Your account has been banned and cannot post reviews. Please contact customer support.",
+            "error_code" => "ACCOUNT_BANNED"
+        ]);
+        exit();
+    }
+
     $beforeImg = null;
     if (isset($_FILES['BeforeImg']) && $_FILES['BeforeImg']['error'] === 0) {
         $beforeImg = uploadImage($_FILES['BeforeImg']);

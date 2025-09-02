@@ -20,6 +20,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['success' => false, 'message' => 'User ID and Product ID are required']);
         exit;
     }
+
+    // Check customer status before allowing wishlist actions
+    $statusStmt = $pdo->prepare("SELECT Status FROM Customer WHERE CID = ?");
+    $statusStmt->execute([$userId]);
+    $customer = $statusStmt->fetch();
+
+    if (!$customer) {
+        echo json_encode(['success' => false, 'message' => 'Customer not found']);
+        exit;
+    }
+
+    if ($customer['Status'] === 'banned') {
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Your account has been banned and cannot modify wishlist. Please contact customer support.',
+            'error_code' => 'ACCOUNT_BANNED'
+        ]);
+        exit;
+    }
     
     try {
         // Check if item already exists in wishlist

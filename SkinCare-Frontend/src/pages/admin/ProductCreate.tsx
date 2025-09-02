@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
@@ -9,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus} from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
 
@@ -44,7 +43,7 @@ function ProductCreate() {
     stock: '',
     forSkinType: '',
     categoryId: '',
-    image: ''
+    image: '',
   });
 
   const skinTypes = ['Oily', 'Dry', 'Combination'];
@@ -67,7 +66,7 @@ function ProductCreate() {
 
   const handleCreateCategory = async () => {
     if (!newCategoryName.trim()) {
-      alert('Please enter a category name');
+      toast.error('Please enter a category name');
       return;
     }
 
@@ -75,7 +74,7 @@ function ProductCreate() {
       const response = await fetch('http://localhost/admin/categories.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ categoryName: newCategoryName.trim() })
+        body: JSON.stringify({ categoryName: newCategoryName.trim() }),
       });
 
       const data = await response.json();
@@ -84,7 +83,7 @@ function ProductCreate() {
         setNewCategoryName('');
         fetchCategories();
         // Auto-select the newly created category
-        setFormData({...formData, categoryId: data.categoryId.toString()});
+        setFormData({ ...formData, categoryId: data.categoryId.toString() });
         toast.success('Category created successfully!');
       } else {
         toast.error('Failed to create category: ' + data.message);
@@ -99,7 +98,7 @@ function ProductCreate() {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -119,19 +118,19 @@ function ProductCreate() {
 
       const response = await fetch('http://localhost/admin/upload-image.php', {
         method: 'POST',
-        body: formData
+        body: formData,
       });
 
       const data = await response.json();
       if (data.success) {
         return data.filename;
       } else {
-        alert('Failed to upload image: ' + data.message);
+        toast.error('Failed to upload image: ' + data.message);
         return null;
       }
     } catch (error) {
       console.error('Error uploading image:', error);
-      alert('Error uploading image');
+      toast.error('Error uploading image');
       return null;
     } finally {
       setUploadingImage(false);
@@ -140,35 +139,35 @@ function ProductCreate() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation
     if (!formData.name.trim()) {
-      alert('Please enter a product name');
+      toast.error('Please enter a product name');
       return;
     }
     if (!formData.price || parseFloat(formData.price) <= 0) {
-      alert('Please enter a valid price');
+      toast.error('Please enter a valid price');
       return;
     }
     if (!formData.stock || parseInt(formData.stock) < 0) {
-      alert('Please enter a valid stock quantity');
+      toast.error('Please enter a valid stock quantity');
       return;
     }
     if (!formData.categoryId) {
-      alert('Please select a category');
+      toast.error('Please select a category');
       return;
     }
     if (!formData.forSkinType) {
-      alert('Please select a skin type');
+      toast.error('Please select a skin type');
       return;
     }
     if (!selectedFile) {
-      alert('Please select an image for the product');
+      toast.error('Please select an image for the product');
       return;
     }
 
     setLoading(true);
-    
+
     try {
       // Upload image first
       const uploadedFilename = await uploadImage();
@@ -188,13 +187,13 @@ function ProductCreate() {
           stock: parseInt(formData.stock),
           forSkinType: formData.forSkinType,
           categoryId: parseInt(formData.categoryId),
-          image: uploadedFilename
-        })
+          image: uploadedFilename,
+        }),
       });
 
       const data = await response.json();
       if (data.success) {
-        toast('Product created successfully!');
+        toast.success('Product created successfully!');
         // Reset form
         setFormData({
           name: '',
@@ -203,17 +202,16 @@ function ProductCreate() {
           stock: '',
           forSkinType: '',
           categoryId: '',
-          image: ''
+          image: '',
         });
         setSelectedFile(null);
         setImagePreview(null);
-        
       } else {
-        alert('Failed to create product: ' + data.message);
+        toast.error('Failed to create product: ' + data.message);
       }
     } catch (error) {
       console.error('Error creating product:', error);
-      alert('Error creating product');
+      toast.error('Error creating product');
     } finally {
       setLoading(false);
     }
@@ -224,7 +222,7 @@ function ProductCreate() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-6">
+    <div className="w-full max-w-7xl mx-auto p-6 ">
       <div className="mb-8 flex items-center justify-between">
         <div className="flex items-center">
           <Separator orientation="vertical" className="mr-4 h-6" />
@@ -240,7 +238,6 @@ function ProductCreate() {
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-        
       </div>
 
       <Card>
@@ -253,35 +250,35 @@ function ProductCreate() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="name">Product Name *</Label>
-                <Input 
-                  id="name" 
+                <Input
+                  id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  placeholder="Enter product name" 
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Enter product name"
                   required
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="price">Price (MMK) *</Label>
-                <Input 
-                  id="price" 
-                  type="number" 
+                <Input
+                  id="price"
+                  type="number"
                   value={formData.price}
-                  onChange={(e) => setFormData({...formData, price: e.target.value})}
-                  placeholder="Enter price" 
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  placeholder="Enter price"
                   min="0"
                   step="0.01"
                   required
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
-              <Textarea 
-                id="description" 
+              <Textarea
+                id="description"
                 value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Enter product description"
                 rows={3}
               />
@@ -291,7 +288,7 @@ function ProductCreate() {
               <div className="space-y-2">
                 <Label htmlFor="category">Category *</Label>
                 <div className="flex gap-2">
-                  <Select value={formData.categoryId} onValueChange={(value) => setFormData({...formData, categoryId: value})}>
+                  <Select value={formData.categoryId} onValueChange={(value) => setFormData({ ...formData, categoryId: value })}>
                     <SelectTrigger className="flex-1">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
@@ -312,9 +309,7 @@ function ProductCreate() {
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Add New Category</DialogTitle>
-                        <DialogDescription>
-                          Create a new product category.
-                        </DialogDescription>
+                        <DialogDescription>Create a new product category.</DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">
                         <div className="space-y-2">
@@ -331,9 +326,7 @@ function ProductCreate() {
                         <Button variant="outline" onClick={() => setIsNewCategoryDialogOpen(false)}>
                           Cancel
                         </Button>
-                        <Button onClick={handleCreateCategory}>
-                          Create Category
-                        </Button>
+                        <Button onClick={handleCreateCategory}>Create Category</Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
@@ -341,12 +334,12 @@ function ProductCreate() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="stock">Stock Quantity *</Label>
-                <Input 
-                  id="stock" 
-                  type="number" 
+                <Input
+                  id="stock"
+                  type="number"
                   value={formData.stock}
-                  onChange={(e) => setFormData({...formData, stock: e.target.value})}
-                  placeholder="Enter stock quantity" 
+                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                  placeholder="Enter stock quantity"
                   min="0"
                   required
                 />
@@ -355,7 +348,7 @@ function ProductCreate() {
 
             <div className="space-y-2">
               <Label htmlFor="skinType">Skin Type *</Label>
-              <Select value={formData.forSkinType} onValueChange={(value) => setFormData({...formData, forSkinType: value})}>
+              <Select value={formData.forSkinType} onValueChange={(value) => setFormData({ ...formData, forSkinType: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select skin type" />
                 </SelectTrigger>
@@ -371,37 +364,21 @@ function ProductCreate() {
 
             <div className="space-y-2">
               <Label htmlFor="image">Product Image *</Label>
-              <Input 
-                id="image" 
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="cursor-pointer"
-              />
-              <p className="text-sm text-gray-500">
-                Upload a product image (JPG, PNG, GIF - Max 5MB)
-              </p>
-              
+              <Input id="image" type="file" accept="image/*" onChange={handleImageChange} className="cursor-pointer" />
+              <p className="text-sm text-gray-500">Upload a product image (JPG, PNG, GIF - Max 5MB)</p>
+
               {imagePreview && (
                 <div className="mt-4">
                   <Label>Image Preview:</Label>
                   <div className="mt-2 w-32 h-32 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center border">
-                    <img
-                      src={imagePreview}
-                      alt="Product preview"
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={imagePreview} alt="Product preview" className="w-full h-full object-cover" />
                   </div>
                 </div>
               )}
             </div>
 
             <div className="flex gap-4 pt-4">
-              <Button 
-                type="submit" 
-                className="bg-green-600 hover:bg-green-700"
-                disabled={loading || uploadingImage}
-              >
+              <Button type="submit" className="bg-green-600 hover:bg-green-700" disabled={loading || uploadingImage}>
                 {loading ? 'Creating...' : uploadingImage ? 'Uploading...' : 'Create Product'}
               </Button>
               <Button type="button" variant="outline" onClick={handleCancel}>

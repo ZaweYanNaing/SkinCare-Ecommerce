@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router';
 import { 
   LayoutDashboard, 
   PackageCheck, 
@@ -7,11 +7,15 @@ import {
   UserPen, 
   ChevronDown,
   ChevronRight,
-  Settings,
   Menu,
-  X
+  X,
+  LogOut
 } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import { ToastContainer } from 'react-toastify';
 
 interface NavItem {
   title: string;
@@ -44,7 +48,7 @@ const navItems: NavItem[] = [
     url: '/admin/productCreate',
     icon: PackageSearch,
     items: [
-      { title: 'Edit Products', url: '/admin/productEdit' },
+      { title: 'Edit Products', url: '/admin/products' },
       { title: 'Create Product', url: '/admin/productCreate' },
     ],
   },
@@ -59,6 +63,27 @@ export default function AdminLayoutWithSidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [expandedItems, setExpandedItems] = useState<string[]>(['Dashboard']);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { admin, logout } = useAdminAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/admin/login');
+  };
+
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case 'Super Admin': return 'bg-red-100 text-red-800';
+      case 'Manager': return 'bg-blue-100 text-blue-800';
+      case 'Staff': return 'bg-green-100 text-green-800';
+      case 'Expert': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getInitials = (email: string) => {
+    return email.substring(0, 2).toUpperCase();
+  };
 
   const toggleExpanded = (title: string) => {
     setExpandedItems(prev => 
@@ -79,22 +104,35 @@ export default function AdminLayoutWithSidebar() {
         {/* User Profile Header */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            {sidebarOpen && (
-              <div className="flex items-center gap-3 p-3 rounded-2xl border border-gray-200 bg-white">
+            {sidebarOpen && admin && (
+              <div className="flex items-center gap-3 p-3 rounded-2xl border border-gray-200 bg-white w-full mr-2">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src="/avatars/alice.jpg" alt="Alice" />
-                  <AvatarFallback className="rounded-lg bg-blue-500 text-white">AL</AvatarFallback>
+                  <AvatarFallback className="rounded-lg bg-blue-500 text-white">
+                    {getInitials(admin.email)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 text-left text-sm leading-tight">
-                  <span className="block font-medium text-gray-900">Alice</span>
-                  <span className="block text-xs text-blue-600">Owner</span>
+                  <span className="block font-medium text-gray-900 truncate">
+                    {admin.email}
+                  </span>
+                  <Badge className={`text-xs ${getRoleBadgeColor(admin.role)} mt-1`}>
+                    {admin.role}
+                  </Badge>
                 </div>
-                <Settings className="h-4 w-4 text-gray-400" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="p-1 h-auto"
+                  title="Logout"
+                >
+                  <LogOut className="h-4 w-4 text-gray-400" />
+                </Button>
               </div>
             )}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors ml-auto"
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors ml-aut z-20"
             >
               {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -156,6 +194,18 @@ export default function AdminLayoutWithSidebar() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         <main className="flex-1 overflow-auto">
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
           <Outlet />
         </main>
       </div>

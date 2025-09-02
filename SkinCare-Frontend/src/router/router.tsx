@@ -9,6 +9,7 @@ import WishList from '../pages/WishList';
 import SignIn from '../pages/auth/SignIn';
 import SignUp from '../pages/auth/SignUp';
 import Profile from '../pages/Profile';
+import AdminLogin from '@/pages/admin/Login';
 import AccManagement from '@/pages/admin/AccManagement';
 import CustomerAccounts from '@/pages/admin/CustomerAccounts';
 import AdminAccounts from '@/pages/admin/AdminAccounts';
@@ -18,6 +19,7 @@ import ProductCreate from '@/pages/admin/ProductCreate';
 import ProductEdit from '@/pages/admin/ProductEdit';
 import Report from '@/pages/admin/Report';
 import Transaction from '@/pages/admin/Transaction';
+import ProtectedAdminRoute from '@/components/ProtectedAdminRoute';
 
 export const router = createBrowserRouter([
   {
@@ -33,8 +35,16 @@ export const router = createBrowserRouter([
     element: <Profile />,
   },
   {
+    path: '/admin/login',
+    element: <AdminLogin />,
+  },
+  {
     path: '/admin',
-    element: <AdminLayoutWithSidebar />,
+    element: (
+      <ProtectedAdminRoute>
+        <AdminLayoutWithSidebar />
+      </ProtectedAdminRoute>
+    ),
     children: [
       {
         path: '',
@@ -54,19 +64,35 @@ export const router = createBrowserRouter([
       },
       {
         path: 'customers',
-        element: <CustomerAccounts />,
+        element: (
+          <ProtectedAdminRoute requiredModule="customer_management" requiredAction="read">
+            <CustomerAccounts />
+          </ProtectedAdminRoute>
+        ),
       },
       {
         path: 'admins',
-        element: <AdminAccounts />,
+        element: (
+          <ProtectedAdminRoute requiredModule="admin_management" requiredAction="read">
+            <AdminAccounts />
+          </ProtectedAdminRoute>
+        ),
       },
       {
         path: 'productCreate',
-        element: <ProductCreate />,
+        element: (
+          <ProtectedAdminRoute requiredModule="product_management" requiredAction="create">
+            <ProductCreate />
+          </ProtectedAdminRoute>
+        ),
       },
       {
         path: 'products',
-        element: <ProductEdit />,
+        element: (
+          <ProtectedAdminRoute requiredModule="product_management" requiredAction="read">
+            <ProductEdit />
+          </ProtectedAdminRoute>
+        ),
       },
       {
         path: 'transaction',

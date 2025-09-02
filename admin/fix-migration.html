@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Admin Migration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .error-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .run-button {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 20px auto;
+        }
+        .run-button:hover {
+            background: #45a049;
+        }
+        .run-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 5px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Fix Admin Migration</h1>
+        
+        <div class="error-info">
+            <h3>⚠️ Migration Issues Detected</h3>
+            <p>The previous admin role migration failed due to:</p>
+            <ul>
+                <li><strong>Data truncation</strong>: Existing admin Type values don't match ENUM constraints</li>
+                <li><strong>Missing column</strong>: RoleDescription column wasn't created</li>
+            </ul>
+            <p>This fixed migration will:</p>
+            <ul>
+                <li>✅ Update existing admin data to match ENUM values</li>
+                <li>✅ Add missing RoleDescription column</li>
+                <li>✅ Add timestamp columns</li>
+                <li>✅ Safely convert Type column to ENUM</li>
+                <li>✅ Set proper role descriptions</li>
+            </ul>
+        </div>
+        
+        <button id="runMigration" class="run-button">
+            🚀 Run Fixed Migration
+        </button>
+        
+        <div id="results" class="results">
+            <h3>Migration Results:</h3>
+            <div id="messages"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('runMigration').addEventListener('click', async function() {
+            const button = this;
+            const results = document.getElementById('results');
+            const messages = document.getElementById('messages');
+            
+            // Disable button and show loading
+            button.disabled = true;
+            button.textContent = '⏳ Running Fixed Migration...';
+            results.style.display = 'none';
+            messages.innerHTML = '';
+            
+            try {
+                const response = await fetch('fix-admin-migration.php', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                // Show results
+                results.style.display = 'block';
+                results.className = `results ${data.success ? 'success' : 'error'}`;
+                
+                if (data.messages && data.messages.length > 0) {
+                    data.messages.forEach(message => {
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = 'message';
+                        messageDiv.textContent = message;
+                        messages.appendChild(messageDiv);
+                    });
+                } else {
+                    messages.innerHTML = '<div class="message">No messages returned</div>';
+                }
+                
+                // Update button
+                if (data.success) {
+                    button.textContent = '✅ Migration Fixed!';
+                    button.style.background = '#28a745';
+                    
+                    // Show next steps
+                    setTimeout(() => {
+                        const nextSteps = document.createElement('div');
+                        nextSteps.innerHTML = `
+                            <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin-top: 20px;">
+                                <h4>🎯 Next Steps:</h4>
+                                <p>1. <a href="setup-demo-admins.php" target="_blank">Create demo admin accounts</a></p>
+                                <p>2. <a href="/admin/login" target="_blank">Access admin login page</a></p>
+                                <p>3. Use credentials: owner / admin123</p>
+                            </div>
+                        `;
+                        results.appendChild(nextSteps);
+                    }, 1000);
+                } else {
+                    button.textContent = '❌ Migration Failed';
+                    button.style.background = '#dc3545';
+                    button.disabled = false;
+                }
+                
+            } catch (error) {
+                console.error('Migration error:', error);
+                results.style.display = 'block';
+                results.className = 'results error';
+                messages.innerHTML = `<div class="message">❌ Error: ${error.message}</div>`;
+                
+                button.textContent = '❌ Migration Failed';
+                button.style.background = '#dc3545';
+                button.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

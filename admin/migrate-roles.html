@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Role Migration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .role-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .role-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .role-title {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+        .permissions {
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .run-button {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 20px auto;
+        }
+        .run-button:hover {
+            background: #45a049;
+        }
+        .run-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Admin Role Migration</h1>
+        <h2>Update Admin Table with Role-Based Access Control</h2>
+        
+        <div class="role-info">
+            <h3>Admin Role Hierarchy:</h3>
+            
+            <div class="role-card">
+                <div class="role-title">🔴 Super Admin</div>
+                <div class="permissions">Full system access - can manage all aspects including admin accounts</div>
+            </div>
+            
+            <div class="role-card">
+                <div class="role-title">🔵 Manager</div>
+                <div class="permissions">Management access - can handle products, orders, and customers but cannot create new admins</div>
+            </div>
+            
+            <div class="role-card">
+                <div class="role-title">🟢 Staff</div>
+                <div class="permissions">Limited access - can view orders, customers, and reports but cannot manage accounts or products</div>
+            </div>
+            
+            <div class="role-card">
+                <div class="role-title">🟣 Expert</div>
+                <div class="permissions">Specialized access - can update products and manage customers with reporting capabilities</div>
+            </div>
+        </div>
+        
+        <div class="role-info">
+            <h3>What this migration does:</h3>
+            <ul>
+                <li>Updates Admin Type column to use ENUM values</li>
+                <li>Adds role descriptions for clarity</li>
+                <li>Adds timestamp columns for tracking</li>
+                <li>Sets existing admin to Super Admin role</li>
+                <li>Implements role-based permission system</li>
+            </ul>
+        </div>
+        
+        <button id="runMigration" class="run-button">
+            🚀 Run Admin Role Migration
+        </button>
+        
+        <div id="results" class="results">
+            <h3>Migration Results:</h3>
+            <div id="messages"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('runMigration').addEventListener('click', async function() {
+            const button = this;
+            const results = document.getElementById('results');
+            const messages = document.getElementById('messages');
+            
+            // Disable button and show loading
+            button.disabled = true;
+            button.textContent = '⏳ Running Migration...';
+            results.style.display = 'none';
+            messages.innerHTML = '';
+            
+            try {
+                const response = await fetch('migrate-admin-roles.php', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                // Show results
+                results.style.display = 'block';
+                results.className = `results ${data.success ? 'success' : 'error'}`;
+                
+                if (data.messages && data.messages.length > 0) {
+                    data.messages.forEach(message => {
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = 'message';
+                        messageDiv.textContent = message;
+                        messages.appendChild(messageDiv);
+                    });
+                } else {
+                    messages.innerHTML = '<div class="message">No messages returned</div>';
+                }
+                
+                // Update button
+                if (data.success) {
+                    button.textContent = '✅ Migration Completed';
+                    button.style.background = '#28a745';
+                } else {
+                    button.textContent = '❌ Migration Failed';
+                    button.style.background = '#dc3545';
+                    button.disabled = false;
+                }
+                
+            } catch (error) {
+                console.error('Migration error:', error);
+                results.style.display = 'block';
+                results.className = 'results error';
+                messages.innerHTML = `<div class="message">❌ Error: ${error.message}</div>`;
+                
+                button.textContent = '❌ Migration Failed';
+                button.style.background = '#dc3545';
+                button.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
