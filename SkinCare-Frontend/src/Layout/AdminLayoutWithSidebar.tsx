@@ -1,16 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router';
-import { 
-  LayoutDashboard, 
-  PackageCheck, 
-  PackageSearch, 
-  UserPen, 
-  ChevronDown,
-  ChevronRight,
-  Menu,
-  X,
-  LogOut
-} from 'lucide-react';
+import { LayoutDashboard, PackageCheck, PackageSearch, UserPen, ChevronDown, ChevronRight, Menu, X, LogOut } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -39,9 +29,7 @@ const navItems: NavItem[] = [
     title: 'Account Management',
     url: '/admin/accManange',
     icon: UserPen,
-    items: [
-      { title: 'All Accounts', url: '/admin/accManange' },
-    ],
+    items: [{ title: 'All Accounts', url: '/admin/accManange' }],
   },
   {
     title: 'Product Management',
@@ -73,11 +61,16 @@ export default function AdminLayoutWithSidebar() {
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case 'Super Admin': return 'bg-red-100 text-red-800';
-      case 'Manager': return 'bg-blue-100 text-blue-800';
-      case 'Staff': return 'bg-green-100 text-green-800';
-      case 'Expert': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Super Admin':
+        return 'bg-red-100 text-red-800';
+      case 'Manager':
+        return 'bg-blue-100 text-blue-800';
+      case 'Staff':
+        return 'bg-green-100 text-green-800';
+      case 'Expert':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -86,11 +79,7 @@ export default function AdminLayoutWithSidebar() {
   };
 
   const toggleExpanded = (title: string) => {
-    setExpandedItems(prev => 
-      prev.includes(title) 
-        ? prev.filter(item => item !== title)
-        : [...prev, title]
-    );
+    setExpandedItems((prev) => (prev.includes(title) ? prev.filter((item) => item !== title) : [...prev, title]));
   };
 
   const isActive = (url: string) => {
@@ -107,33 +96,18 @@ export default function AdminLayoutWithSidebar() {
             {sidebarOpen && admin && (
               <div className="flex items-center gap-3 p-3 rounded-2xl border border-gray-200 bg-white w-full mr-2">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarFallback className="rounded-lg bg-blue-500 text-white">
-                    {getInitials(admin.email)}
-                  </AvatarFallback>
+                  <AvatarFallback className="rounded-lg bg-blue-500 text-white">{getInitials(admin.email)}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 text-left text-sm leading-tight">
-                  <span className="block font-medium text-gray-900 truncate">
-                    {admin.email}
-                  </span>
-                  <Badge className={`text-xs ${getRoleBadgeColor(admin.role)} mt-1`}>
-                    {admin.role}
-                  </Badge>
+                  <span className="block font-medium text-gray-900 truncate">{admin.email}</span>
+                  <Badge className={`text-xs ${getRoleBadgeColor(admin.role)} mt-1`}>{admin.role}</Badge>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleLogout}
-                  className="p-1 h-auto"
-                  title="Logout"
-                >
+                <Button variant="ghost" size="sm" onClick={handleLogout} className="p-1 h-auto" title="Logout">
                   <LogOut className="h-4 w-4 text-gray-400" />
                 </Button>
               </div>
             )}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors ml-aut z-20"
-            >
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 rounded-lg hover:bg-gray-100 transition-colors ml-aut z-20">
               {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
@@ -153,18 +127,20 @@ export default function AdminLayoutWithSidebar() {
                   className={`flex items-center ${sidebarOpen ? 'justify-between' : 'justify-center'} p-3 rounded-lg cursor-pointer transition-colors ${
                     isActive(item.url) ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'
                   }`}
-                  onClick={() => item.items && sidebarOpen && toggleExpanded(item.title)}
+                  onClick={() => {
+                    if (item.items && sidebarOpen) {
+                      toggleExpanded(item.title);
+                    } else {
+                      navigate(item.url);
+                    }
+                  }}
                   title={!sidebarOpen ? item.title : ''}
                 >
                   <div className={`flex items-center ${sidebarOpen ? 'space-x-3' : ''}`}>
                     <item.icon size={20} />
                     {sidebarOpen && <span className="font-medium">{item.title}</span>}
                   </div>
-                  {sidebarOpen && item.items && (
-                    expandedItems.includes(item.title) ? 
-                      <ChevronDown size={16} /> : 
-                      <ChevronRight size={16} />
-                  )}
+                  {sidebarOpen && item.items && (expandedItems.includes(item.title) ? <ChevronDown size={16} /> : <ChevronRight size={16} />)}
                 </div>
 
                 {/* Sub items */}
@@ -175,9 +151,7 @@ export default function AdminLayoutWithSidebar() {
                         key={subItem.title}
                         to={subItem.url}
                         className={`block p-2 rounded-lg text-sm transition-colors ${
-                          isActive(subItem.url) 
-                            ? 'bg-blue-50 text-blue-700 font-medium' 
-                            : 'text-gray-600 hover:bg-gray-100'
+                          isActive(subItem.url) ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100'
                         }`}
                       >
                         {subItem.title}
