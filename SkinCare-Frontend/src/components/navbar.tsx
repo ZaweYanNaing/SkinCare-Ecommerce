@@ -211,7 +211,7 @@ export default function navbar() {
           tranID: valueOpt,
           paymentMethod: payment.find((p) => p.value === value)?.label || value,
         },
-        status: 'confirmed',
+        status: 'pending',
       };
 
       const response = await fetch('http://localhost/order.php', {
