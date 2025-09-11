@@ -112,7 +112,7 @@ const BestSellerSection: React.FC = () => {
   const userId = user.id;
 
   return (
-    <section className="py-16">
+    <section className="py-16 mt-110">
       <div className="max-w-7xl mx-auto px-4">
         <div className="mb-12">
           <h2 className="mb-4 text-4xl font-bold text-gray-900">Best Sellers</h2>
