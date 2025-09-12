@@ -64,35 +64,19 @@ export const router = createBrowserRouter([
       },
       {
         path: 'customers',
-        element: (
-          <ProtectedAdminRoute requiredModule="customer_management" requiredAction="read">
-            <CustomerAccounts />
-          </ProtectedAdminRoute>
-        ),
+        element: <CustomerAccounts />,
       },
       {
         path: 'admins',
-        element: (
-          <ProtectedAdminRoute requiredModule="admin_management" requiredAction="read">
-            <AdminAccounts />
-          </ProtectedAdminRoute>
-        ),
+        element: <AdminAccounts />,
       },
       {
         path: 'productCreate',
-        element: (
-          <ProtectedAdminRoute requiredModule="product_management" requiredAction="create">
-            <ProductCreate />
-          </ProtectedAdminRoute>
-        ),
+        element: <ProductCreate />,
       },
       {
         path: 'products',
-        element: (
-          <ProtectedAdminRoute requiredModule="product_management" requiredAction="read">
-            <ProductEdit />
-          </ProtectedAdminRoute>
-        ),
+        element: <ProductEdit />,
       },
       {
         path: 'transaction',

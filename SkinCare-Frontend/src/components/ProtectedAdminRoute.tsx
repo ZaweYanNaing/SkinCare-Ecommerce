@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, Outlet } from 'react-router';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Shield, Loader2 } from 'lucide-react';
@@ -9,6 +9,23 @@ interface ProtectedAdminRouteProps {
   requiredModule?: string;
   requiredAction?: string;
 }
+
+// Helper function to get required permissions based on route
+const getRoutePermissions = (pathname: string) => {
+  if (pathname.includes('/admin/customers')) {
+    return { module: 'customer_management', action: 'read' };
+  }
+  if (pathname.includes('/admin/admins')) {
+    return { module: 'admin_management', action: 'read' };
+  }
+  if (pathname.includes('/admin/productCreate')) {
+    return { module: 'product_management', action: 'create' };
+  }
+  if (pathname.includes('/admin/products')) {
+    return { module: 'product_management', action: 'read' };
+  }
+  return null;
+};
 
 const ProtectedAdminRoute = ({ 
   children, 
@@ -42,9 +59,14 @@ const ProtectedAdminRoute = ({
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
 
+  // Get permissions for the current route
+  const routePermissions = getRoutePermissions(location.pathname);
+  const module = requiredModule || routePermissions?.module;
+  const action = requiredAction || routePermissions?.action;
+
   // Check specific permissions if required
-  if (requiredModule && requiredAction) {
-    if (!hasPermission(requiredModule, requiredAction)) {
+  if (module && action) {
+    if (!hasPermission(module, action)) {
       return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
           <Card className="w-full max-w-md">
@@ -59,7 +81,7 @@ const ProtectedAdminRoute = ({
                 Your role ({admin?.role}) doesn't have permission to access this page.
               </p>
               <p className="text-sm text-gray-500 text-center">
-                Required: {requiredAction} access to {requiredModule}
+                Required: {action} access to {module}
               </p>
               <button
                 onClick={() => window.history.back()}
