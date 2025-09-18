@@ -2,7 +2,8 @@ import { createBrowserRouter } from 'react-router';
 import AdminLayoutWithSidebar from '@/Layout/AdminLayoutWithSidebar';
 import Layout from '../Layout/Layout';
 import Home from '../pages/Home';
-import NewProduct from '../pages/NewProduct';
+import Consult from '../pages/Consult';
+import ExpertDashboard from '../pages/ExpertDashboard';
 import Proudct from '../pages/Product';
 import ProductDeatil from '../pages/ProductDetail';
 import WishList from '../pages/WishList';
@@ -37,6 +38,10 @@ export const router = createBrowserRouter([
   {
     path: '/admin/login',
     element: <AdminLogin />,
+  },
+  {
+    path: '/expert',
+    element: <ExpertDashboard />,
   },
   {
     path: '/admin',
@@ -102,8 +107,8 @@ export const router = createBrowserRouter([
         element: <WishList />,
       },
       {
-        path: '/new',
-        element: <NewProduct />,
+        path: '/consult',
+        element: <Consult />,
       },
       {
         path: '/products/:id',

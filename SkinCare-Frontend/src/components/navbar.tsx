@@ -256,7 +256,7 @@ export default function navbar() {
         <Link to="/">Home</Link>
         <Link to="/product"> Product </Link>
         <Link to="/wishList"> WishList </Link>
-        <Link to="/new"> New </Link>
+        <Link to="/consult"> Consult </Link>
       </div>
 
       {/*Search and Profile , Shopping Cart */}
