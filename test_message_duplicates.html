@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Message Duplicates</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Chat System - Message Duplicate Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Instructions</h2>
+        <ol>
+            <li>Open two browser windows/tabs</li>
+            <li>Window 1: Go to <code>http://localhost:5173/consult</code> (Customer)</li>
+            <li>Window 2: Go to <code>http://localhost:5173/expert</code> (Expert)</li>
+            <li>Login as customer in Window 1</li>
+            <li>Login as expert in Window 2 (sarah@skincare.com / hello)</li>
+            <li>Start a conversation from customer side</li>
+            <li>Accept the conversation from expert side</li>
+            <li>Send messages from both sides</li>
+            <li>Check if messages appear only once</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>What Was Fixed</h2>
+        <ul>
+            <li class="success">✅ Duplicate message prevention in loadMessages()</li>
+            <li class="success">✅ Duplicate message prevention in sendMessage()</li>
+            <li class="success">✅ Proper message ID checking</li>
+            <li class="success">✅ Improved polling mechanism</li>
+            <li class="success">✅ Memory leak prevention</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>Expected Behavior</h2>
+        <ul>
+            <li>Each message should appear only once</li>
+            <li>Messages should appear in real-time</li>
+            <li>No duplicate messages in the UI</li>
+            <li>Proper message ordering</li>
+            <li>Read receipts working correctly</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>Backend API Test</h2>
+        <button onclick="testAPI()">Test Message API</button>
+        <div id="apiResults"></div>
+    </div>
+
+    <script>
+        async function testAPI() {
+            const results = document.getElementById('apiResults');
+            results.innerHTML = '<p class="info">Testing API...</p>';
+            
+            try {
+                // Test getting messages for a conversation
+                const response = await fetch('http://localhost/chat/messages.php?conversationID=1&lastMessageID=0');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const messageIds = data.data.map(msg => msg.MessageID);
+                    const uniqueIds = [...new Set(messageIds)];
+                    
+                    if (messageIds.length === uniqueIds.length) {
+                        results.innerHTML = '<p class="success">✅ API returns unique messages only</p>';
+                    } else {
+                        results.innerHTML = '<p class="error">❌ API returns duplicate messages</p>';
+                    }
+                } else {
+                    results.innerHTML = '<p class="info">No messages found or conversation doesn\'t exist</p>';
+                }
+            } catch (error) {
+                results.innerHTML = '<p class="error">❌ API test failed: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>

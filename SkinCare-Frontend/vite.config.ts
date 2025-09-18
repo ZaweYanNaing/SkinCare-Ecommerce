@@ -14,9 +14,26 @@ export default defineConfig({
     logOverride: { 'this-is-undefined-in-esm': 'silent' },
   },
   server: {
+    port: 5173,
+    host: true,
     hmr: {
       overlay: false,
     },
+  },
+  optimizeDeps: {
+    force: true,
+    include: [
+      'react',
+      'react-dom',
+      'react-router',
+      'react-router-dom',
+      'lucide-react',
+      'react-toastify',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-hover-card',
+      '@radix-ui/react-popover',
+      '@radix-ui/react-alert-dialog'
+    ]
   },
   test: {
     environment: 'jsdom',

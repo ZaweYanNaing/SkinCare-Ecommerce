@@ -26,21 +26,44 @@ try {
             sendResponse(false, null, 'Email and password are required');
         }
         
-        $stmt = $con->prepare("SELECT ExpertID, Name, Email, Specialization FROM Expert WHERE Email = ? AND Password = ?");
-        $hashedPassword = md5($password); // In production, use proper password hashing
-        $stmt->bind_param("ss", $email, $hashedPassword);
+        // Get expert with password for verification
+        $stmt = $con->prepare("SELECT ExpertID, Name, Email, Specialization, Password FROM Expert WHERE Email = ?");
+        $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
         
         if ($result->num_rows === 1) {
             $expert = $result->fetch_assoc();
             
-            // Update expert status to active
-            $updateStmt = $con->prepare("UPDATE Expert SET Status = 'active' WHERE ExpertID = ?");
-            $updateStmt->bind_param("i", $expert['ExpertID']);
-            $updateStmt->execute();
+            // Verify password - check both bcrypt and plain text for demo
+            $passwordValid = false;
             
-            sendResponse(true, $expert, 'Login successful');
+            // Check if it's a bcrypt hash
+            if (password_verify($password, $expert['Password'])) {
+                $passwordValid = true;
+            }
+            // For demo purposes, also check plain text (remove in production)
+            elseif ($expert['Password'] === $password) {
+                $passwordValid = true;
+            }
+            // Check MD5 hash (for compatibility)
+            elseif ($expert['Password'] === md5($password)) {
+                $passwordValid = true;
+            }
+            
+            if ($passwordValid) {
+                // Remove password from response
+                unset($expert['Password']);
+                
+                // Update expert status to active
+                $updateStmt = $con->prepare("UPDATE Expert SET Status = 'active' WHERE ExpertID = ?");
+                $updateStmt->bind_param("i", $expert['ExpertID']);
+                $updateStmt->execute();
+                
+                sendResponse(true, $expert, 'Login successful');
+            } else {
+                sendResponse(false, null, 'Invalid credentials');
+            }
         } else {
             sendResponse(false, null, 'Invalid credentials');
         }

@@ -108,23 +108,29 @@ const ExpertDashboard = () => {
     setLoading(true);
 
     try {
+      console.log('Attempting login with:', loginForm);
+      
       const response = await fetch('http://localhost/chat/experts.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginForm)
       });
 
+      console.log('Response status:', response.status);
       const data = await response.json();
+      console.log('Response data:', data);
+      
       if (data.success) {
         setExpert(data.data);
         setIsLoggedIn(true);
         localStorage.setItem('expert', JSON.stringify(data.data));
         toast.success('Login successful!');
       } else {
-        toast.error(data.message);
+        toast.error(data.message || 'Login failed');
       }
     } catch (error) {
-      toast.error('Login failed');
+      console.error('Login error:', error);
+      toast.error('Login failed - please check your connection');
     } finally {
       setLoading(false);
     }
@@ -164,7 +170,12 @@ const ExpertDashboard = () => {
       
       if (data.success) {
         if (isPolling && data.data.length > 0) {
-          setMessages(prev => [...prev, ...data.data]);
+          // Only add new messages that don't already exist
+          setMessages(prev => {
+            const existingIds = new Set(prev.map(msg => msg.MessageID));
+            const newMessages = data.data.filter(msg => !existingIds.has(msg.MessageID));
+            return newMessages.length > 0 ? [...prev, ...newMessages] : prev;
+          });
           markMessagesAsRead();
         } else if (!isPolling) {
           setMessages(data.data);
@@ -236,7 +247,11 @@ const ExpertDashboard = () => {
 
       const data = await response.json();
       if (data.success) {
-        setMessages(prev => [...prev, data.data]);
+        // Check if message already exists before adding
+        setMessages(prev => {
+          const messageExists = prev.some(msg => msg.MessageID === data.data.MessageID);
+          return messageExists ? prev : [...prev, data.data];
+        });
         setNewMessage('');
         loadConversations();
       } else {

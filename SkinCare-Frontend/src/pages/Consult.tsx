@@ -62,17 +62,6 @@ const Consult = () => {
     scrollToBottom();
   }, [messages]);
 
-  useEffect(() => {
-    if (activeConversation) {
-      loadMessages();
-      startPolling();
-    } else {
-      stopPolling();
-    }
-
-    return () => stopPolling();
-  }, [activeConversation]);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -85,6 +74,19 @@ const Consult = () => {
       }
     }, 2000);
   };
+
+  useEffect(() => {
+    if (activeConversation) {
+      loadMessages();
+      startPolling();
+    } else {
+      stopPolling();
+    }
+
+    return () => {
+      stopPolling();
+    };
+  }, [activeConversation]);
 
   const stopPolling = () => {
     if (pollIntervalRef.current) {
@@ -127,9 +129,16 @@ const Consult = () => {
       
       if (data.success) {
         if (isPolling && data.data.length > 0) {
-          setMessages(prev => [...prev, ...data.data]);
+          // Only add new messages that don't already exist
+          setMessages(prev => {
+            const existingIds = new Set(prev.map(msg => msg.MessageID));
+            const newMessages = data.data.filter(msg => !existingIds.has(msg.MessageID));
+            console.log(`Polling: Found ${data.data.length} messages, ${newMessages.length} are new`);
+            return newMessages.length > 0 ? [...prev, ...newMessages] : prev;
+          });
           markMessagesAsRead();
         } else if (!isPolling) {
+          console.log(`Initial load: Setting ${data.data.length} messages`);
           setMessages(data.data);
           markMessagesAsRead();
         }
@@ -203,7 +212,12 @@ const Consult = () => {
 
       const data = await response.json();
       if (data.success) {
-        setMessages(prev => [...prev, data.data]);
+        // Check if message already exists before adding
+        setMessages(prev => {
+          const messageExists = prev.some(msg => msg.MessageID === data.data.MessageID);
+          console.log(`Sending message: ID ${data.data.MessageID}, exists: ${messageExists}`);
+          return messageExists ? prev : [...prev, data.data];
+        });
         setNewMessage('');
         loadConversations(); // Update conversation list
       } else {
