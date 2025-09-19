@@ -53,15 +53,28 @@ try {
             sendResponse(false, null, 'CustomerID is required');
         }
         
-        // Check if there's already an active conversation
-        $checkStmt = $con->prepare("SELECT ConversationID FROM Conversation WHERE CustomerID = ? AND Status IN ('waiting', 'active')");
-        $checkStmt->bind_param("i", $customerID);
-        $checkStmt->execute();
-        $checkResult = $checkStmt->get_result();
-        
-        if ($checkResult->num_rows > 0) {
-            $existing = $checkResult->fetch_assoc();
-            sendResponse(true, ['conversationID' => $existing['ConversationID']], 'Using existing conversation');
+        // Check if there's already an active conversation with this specific expert
+        if ($expertID) {
+            $checkStmt = $con->prepare("SELECT ConversationID FROM Conversation WHERE CustomerID = ? AND ExpertID = ? AND Status IN ('waiting', 'active')");
+            $checkStmt->bind_param("ii", $customerID, $expertID);
+            $checkStmt->execute();
+            $checkResult = $checkStmt->get_result();
+            
+            if ($checkResult->num_rows > 0) {
+                $existing = $checkResult->fetch_assoc();
+                sendResponse(true, ['conversationID' => $existing['ConversationID']], 'Using existing conversation with this expert');
+            }
+        } else {
+            // For quick consultation (no specific expert), check for any waiting conversation
+            $checkStmt = $con->prepare("SELECT ConversationID FROM Conversation WHERE CustomerID = ? AND Status = 'waiting' AND ExpertID IS NULL");
+            $checkStmt->bind_param("i", $customerID);
+            $checkStmt->execute();
+            $checkResult = $checkStmt->get_result();
+            
+            if ($checkResult->num_rows > 0) {
+                $existing = $checkResult->fetch_assoc();
+                sendResponse(true, ['conversationID' => $existing['ConversationID']], 'Using existing waiting conversation');
+            }
         }
         
         // Create new conversation

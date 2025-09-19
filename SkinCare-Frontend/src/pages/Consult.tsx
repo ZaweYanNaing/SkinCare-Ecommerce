@@ -124,15 +124,17 @@ const Consult = () => {
 
     try {
       const lastMessageID = isPolling && messages.length > 0 ? messages[messages.length - 1].MessageID : 0;
-      const response = await fetch(`http://localhost/chat/messages.php?conversationID=${activeConversation.ConversationID}&lastMessageID=${lastMessageID}`);
+      const response = await fetch(
+        `http://localhost/chat/messages.php?conversationID=${activeConversation.ConversationID}&lastMessageID=${lastMessageID}`,
+      );
       const data = await response.json();
-      
+
       if (data.success) {
         if (isPolling && data.data.length > 0) {
           // Only add new messages that don't already exist
-          setMessages(prev => {
-            const existingIds = new Set(prev.map(msg => msg.MessageID));
-            const newMessages = data.data.filter(msg => !existingIds.has(msg.MessageID));
+          setMessages((prev) => {
+            const existingIds = new Set(prev.map((msg) => msg.MessageID));
+            const newMessages = data.data.filter((msg: Message) => !existingIds.has(msg.MessageID));
             console.log(`Polling: Found ${data.data.length} messages, ${newMessages.length} are new`);
             return newMessages.length > 0 ? [...prev, ...newMessages] : prev;
           });
@@ -157,8 +159,8 @@ const Consult = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           conversationID: activeConversation.ConversationID,
-          senderType: 'customer'
-        })
+          senderType: 'customer',
+        }),
       });
     } catch (error) {
       console.error('Error marking messages as read:', error);
@@ -173,17 +175,26 @@ const Consult = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           customerID,
-          expertID
-        })
+          expertID,
+        }),
       });
 
       const data = await response.json();
       if (data.success) {
         await loadConversations();
-        const conversation = conversations.find(c => c.ConversationID === data.data.conversationID);
-        if (conversation) {
-          setActiveConversation(conversation);
-          setView('chat');
+
+        // Reload conversations and find the new one
+        const conversationsResponse = await fetch(`http://localhost/chat/conversations.php?customerID=${customerID}`);
+        const conversationsData = await conversationsResponse.json();
+
+        if (conversationsData.success) {
+          const conversation = conversationsData.data.find((c: Conversation) => c.ConversationID === data.data.conversationID);
+          if (conversation) {
+            setActiveConversation(conversation);
+            setView('chat');
+          } else {
+            toast.error('Conversation created but could not be loaded');
+          }
         }
       } else {
         toast.error(data.message);
@@ -206,15 +217,15 @@ const Consult = () => {
           conversationID: activeConversation.ConversationID,
           senderType: 'customer',
           senderID: customerID,
-          messageText: newMessage.trim()
-        })
+          messageText: newMessage.trim(),
+        }),
       });
 
       const data = await response.json();
       if (data.success) {
         // Check if message already exists before adding
-        setMessages(prev => {
-          const messageExists = prev.some(msg => msg.MessageID === data.data.MessageID);
+        setMessages((prev) => {
+          const messageExists = prev.some((msg) => msg.MessageID === data.data.MessageID);
           console.log(`Sending message: ID ${data.data.MessageID}, exists: ${messageExists}`);
           return messageExists ? prev : [...prev, data.data];
         });
@@ -260,47 +271,56 @@ const Consult = () => {
             <div className="flex items-center space-x-3">
               <button
                 onClick={() => setView('experts')}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100"
+                title="Back to conversations"
               >
                 ←
               </button>
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                  activeConversation.ExpertID === 1 ? 'bg-blue-100' : activeConversation.ExpertID === 2 ? 'bg-purple-100' : 'bg-gray-100'
+                }`}
+              >
                 {activeConversation.ExpertAvatar ? (
-                  <img src={activeConversation.ExpertAvatar} alt="" className="w-10 h-10 rounded-full" />
+                  <img src={activeConversation.ExpertAvatar} alt="" className="w-12 h-12 rounded-full" />
                 ) : (
-                  <User className="w-5 h-5 text-blue-600" />
+                  <User
+                    className={`w-6 h-6 ${
+                      activeConversation.ExpertID === 1 ? 'text-blue-600' : activeConversation.ExpertID === 2 ? 'text-purple-600' : 'text-gray-600'
+                    }`}
+                  />
                 )}
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">
-                  {activeConversation.ExpertName || 'Waiting for Expert'}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  {activeConversation.Specialization || 'General Consultation'}
-                </p>
+                <h3 className="font-semibold text-gray-900">{activeConversation.ExpertName || 'Waiting for Expert'}</h3>
+                <p className="text-sm text-gray-500">{activeConversation.Specialization || 'General Consultation'}</p>
+                <p className="text-xs text-gray-400">Conversation #{activeConversation.ConversationID}</p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className={`w-2 h-2 rounded-full ${
-                activeConversation.Status === 'active' ? 'bg-green-500' : 
-                activeConversation.Status === 'waiting' ? 'bg-yellow-500' : 'bg-gray-500'
-              }`} />
-              <span className="text-sm text-gray-500 capitalize">{activeConversation.Status}</span>
+            <div className="flex items-center space-x-3">
+              <div
+                className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  activeConversation.Status === 'active'
+                    ? 'bg-green-100 text-green-800'
+                    : activeConversation.Status === 'waiting'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-gray-100 text-gray-800'
+                }`}
+              >
+                {activeConversation.Status === 'active' ? '🟢 Active' : activeConversation.Status === 'waiting' ? '🟡 Waiting' : '⚫ Closed'}
+              </div>
             </div>
           </div>
 
           {/* Messages */}
           <div className="h-96 overflow-y-auto p-6 space-y-4">
             {messages.map((message) => (
-              <div
-                key={message.MessageID}
-                className={`flex ${message.SenderType === 'customer' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                  message.SenderType === 'customer'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-900'
-                }`}>
+              <div key={message.MessageID} className={`flex ${message.SenderType === 'customer' ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                    message.SenderType === 'customer' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-900'
+                  }`}
+                >
                   <p className="text-sm">{message.MessageText}</p>
                   <div className="flex items-center justify-between mt-1">
                     <span className="text-xs opacity-75">{formatTime(message.SentAt)}</span>
@@ -350,7 +370,7 @@ const Consult = () => {
         {/* My Conversations */}
         {conversations.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">My Conversations</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">My Conversations ({conversations.length})</h2>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {conversations.map((conversation) => (
                 <div
@@ -359,28 +379,49 @@ const Consult = () => {
                     setActiveConversation(conversation);
                     setView('chat');
                   }}
-                  className="bg-white rounded-lg shadow-md p-4 cursor-pointer hover:shadow-lg transition-shadow"
+                  className={`bg-white rounded-lg shadow-md p-4 cursor-pointer hover:shadow-lg transition-shadow border-l-4 ${
+                    conversation.Status === 'active'
+                      ? 'border-green-500'
+                      : conversation.Status === 'waiting'
+                        ? 'border-yellow-500'
+                        : 'border-gray-300'
+                  }`}
                 >
                   <div className="flex items-center space-x-3 mb-2">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <User className="w-5 h-5 text-blue-600" />
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        conversation.ExpertID === 1 ? 'bg-blue-100' : conversation.ExpertID === 2 ? 'bg-purple-100' : 'bg-gray-100'
+                      }`}
+                    >
+                      <User
+                        className={`w-5 h-5 ${
+                          conversation.ExpertID === 1 ? 'text-blue-600' : conversation.ExpertID === 2 ? 'text-purple-600' : 'text-gray-600'
+                        }`}
+                      />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">
-                        {conversation.ExpertName || 'Waiting for Expert'}
-                      </h3>
+                      <h3 className="font-medium text-gray-900">{conversation.ExpertName || 'Waiting for Expert'}</h3>
                       <p className="text-sm text-gray-500">{conversation.Specialization}</p>
                     </div>
                     {conversation.UnreadCount > 0 && (
-                      <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1">
-                        {conversation.UnreadCount}
-                      </span>
+                      <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1">{conversation.UnreadCount}</span>
                     )}
                   </div>
                   <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span className="capitalize">{conversation.Status}</span>
+                    <span
+                      className={`capitalize px-2 py-1 rounded-full text-xs ${
+                        conversation.Status === 'active'
+                          ? 'bg-green-100 text-green-800'
+                          : conversation.Status === 'waiting'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {conversation.Status}
+                    </span>
                     <span>{new Date(conversation.UpdatedAt).toLocaleDateString()}</span>
                   </div>
+                  <div className="mt-2 text-xs text-gray-400">Conversation #{conversation.ConversationID}</div>
                 </div>
               ))}
             </div>
@@ -405,10 +446,11 @@ const Consult = () => {
                     <h3 className="font-semibold text-gray-900">{expert.Name}</h3>
                     <p className="text-sm text-blue-600">{expert.Specialization}</p>
                     <div className="flex items-center space-x-1 mt-1">
-                      <div className={`w-2 h-2 rounded-full ${
-                        expert.Status === 'active' ? 'bg-green-500' : 
-                        expert.Status === 'busy' ? 'bg-yellow-500' : 'bg-gray-500'
-                      }`} />
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          expert.Status === 'active' ? 'bg-green-500' : expert.Status === 'busy' ? 'bg-yellow-500' : 'bg-gray-500'
+                        }`}
+                      />
                       <span className="text-xs text-gray-500 capitalize">{expert.Status}</span>
                     </div>
                   </div>

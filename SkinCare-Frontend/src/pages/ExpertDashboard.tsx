@@ -51,6 +51,26 @@ const ExpertDashboard = () => {
       setExpert(JSON.parse(savedExpert));
       setIsLoggedIn(true);
     }
+
+    // Add beforeunload event listener to set expert offline when page is closed
+    const handleBeforeUnload = () => {
+      const currentExpert = localStorage.getItem('expert');
+      if (currentExpert) {
+        const expertData = JSON.parse(currentExpert);
+        // Use sendBeacon for reliable delivery during page unload
+        const data = JSON.stringify({
+          expertID: expertData.ExpertID
+        });
+        
+        navigator.sendBeacon('http://localhost/chat/expert-offline.php', data);
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, []);
 
   useEffect(() => {
@@ -136,7 +156,23 @@ const ExpertDashboard = () => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    if (expert) {
+      try {
+        // Update expert status to offline in the database
+        await fetch('http://localhost/chat/expert-status.php', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            expertID: expert.ExpertID,
+            status: 'offline'
+          })
+        });
+      } catch (error) {
+        console.error('Error updating expert status:', error);
+      }
+    }
+    
     setExpert(null);
     setIsLoggedIn(false);
     setConversations([]);
@@ -144,6 +180,7 @@ const ExpertDashboard = () => {
     setMessages([]);
     localStorage.removeItem('expert');
     stopPolling();
+    toast.success('Logged out successfully');
   };
 
   const loadConversations = async () => {
@@ -346,11 +383,16 @@ const ExpertDashboard = () => {
                 <div>
                   <h3 className="font-semibold text-gray-900">{expert?.Name}</h3>
                   <p className="text-sm text-gray-500">{expert?.Specialization}</p>
+                  <div className="flex items-center space-x-1 mt-1">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-xs text-green-600 font-medium">Online</span>
+                  </div>
                 </div>
               </div>
               <button
                 onClick={handleLogout}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100"
+                title="Logout"
               >
                 <LogOut className="w-5 h-5" />
               </button>
