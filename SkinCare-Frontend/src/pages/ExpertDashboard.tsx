@@ -43,26 +43,33 @@ const ExpertDashboard = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isLoggingOutRef = useRef(false);
 
   useEffect(() => {
     // Check if expert is already logged in
     const savedExpert = localStorage.getItem('expert');
     if (savedExpert) {
-      setExpert(JSON.parse(savedExpert));
+      const expertData = JSON.parse(savedExpert);
+      setExpert(expertData);
       setIsLoggedIn(true);
+      // Set expert status to active when logging in
+      setExpertStatus(expertData.ExpertID, 'active');
     }
 
-    // Add beforeunload event listener to set expert offline when page is closed
+    // Add beforeunload event listener - only set offline if actually logging out
     const handleBeforeUnload = () => {
-      const currentExpert = localStorage.getItem('expert');
-      if (currentExpert) {
-        const expertData = JSON.parse(currentExpert);
-        // Use sendBeacon for reliable delivery during page unload
-        const data = JSON.stringify({
-          expertID: expertData.ExpertID
-        });
-        
-        navigator.sendBeacon('http://localhost/chat/expert-offline.php', data);
+      // Only set offline if we're actually logging out, not just refreshing
+      if (isLoggingOutRef.current) {
+        const currentExpert = localStorage.getItem('expert');
+        if (currentExpert) {
+          const expertData = JSON.parse(currentExpert);
+          const data = JSON.stringify({
+            expertID: expertData.ExpertID,
+            status: 'offline'
+          });
+          navigator.sendBeacon('http://localhost/chat/expert-status.php', data);
+        }
       }
     };
 
@@ -70,6 +77,7 @@ const ExpertDashboard = () => {
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
+      stopHeartbeat();
     };
   }, []);
 
@@ -77,8 +85,12 @@ const ExpertDashboard = () => {
     if (isLoggedIn && expert) {
       loadConversations();
       startConversationPolling();
+      startHeartbeat(); // Start heartbeat to keep expert active
     }
-    return () => stopPolling();
+    return () => {
+      stopPolling();
+      stopHeartbeat();
+    };
   }, [isLoggedIn, expert]);
 
   useEffect(() => {
@@ -123,6 +135,53 @@ const ExpertDashboard = () => {
     }
   };
 
+  const startHeartbeat = () => {
+    stopHeartbeat();
+    // Send heartbeat every 2 minutes to keep expert status active
+    heartbeatIntervalRef.current = setInterval(() => {
+      sendHeartbeat();
+    }, 120000); // 2 minutes
+  };
+
+  const stopHeartbeat = () => {
+    if (heartbeatIntervalRef.current) {
+      clearInterval(heartbeatIntervalRef.current);
+      heartbeatIntervalRef.current = null;
+    }
+  };
+
+  const sendHeartbeat = async () => {
+    if (!expert) return;
+    
+    try {
+      await fetch('http://localhost/chat/expert-status.php', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          expertID: expert.ExpertID,
+          status: 'active'
+        }),
+      });
+    } catch (error) {
+      console.error('Error sending heartbeat:', error);
+    }
+  };
+
+  const setExpertStatus = async (expertID: number, status: string) => {
+    try {
+      await fetch('http://localhost/chat/expert-status.php', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          expertID,
+          status
+        }),
+      });
+    } catch (error) {
+      console.error('Error setting expert status:', error);
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -144,6 +203,8 @@ const ExpertDashboard = () => {
         setExpert(data.data);
         setIsLoggedIn(true);
         localStorage.setItem('expert', JSON.stringify(data.data));
+        // Set expert status to active upon successful login
+        await setExpertStatus(data.data.ExpertID, 'active');
         toast.success('Login successful!');
       } else {
         toast.error(data.message || 'Login failed');
@@ -157,29 +218,30 @@ const ExpertDashboard = () => {
   };
 
   const handleLogout = async () => {
+    // Set the flag to indicate we're logging out
+    isLoggingOutRef.current = true;
+    
     if (expert) {
       try {
         // Update expert status to offline in the database
-        await fetch('http://localhost/chat/expert-status.php', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            expertID: expert.ExpertID,
-            status: 'offline'
-          })
-        });
+        await setExpertStatus(expert.ExpertID, 'offline');
       } catch (error) {
         console.error('Error updating expert status:', error);
       }
     }
     
+    // Stop heartbeat and polling
+    stopHeartbeat();
+    stopPolling();
+    
+    // Clear state and localStorage
     setExpert(null);
     setIsLoggedIn(false);
     setConversations([]);
     setActiveConversation(null);
     setMessages([]);
     localStorage.removeItem('expert');
-    stopPolling();
+    
     toast.success('Logged out successfully');
   };
 
@@ -210,7 +272,7 @@ const ExpertDashboard = () => {
           // Only add new messages that don't already exist
           setMessages(prev => {
             const existingIds = new Set(prev.map(msg => msg.MessageID));
-            const newMessages = data.data.filter(msg => !existingIds.has(msg.MessageID));
+            const newMessages = data.data.filter((msg: { MessageID: number; }) => !existingIds.has(msg.MessageID));
             return newMessages.length > 0 ? [...prev, ...newMessages] : prev;
           });
           markMessagesAsRead();
