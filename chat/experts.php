@@ -27,7 +27,7 @@ try {
         }
         
         // Get expert with password for verification
-        $stmt = $con->prepare("SELECT ExpertID, Name, Email, Specialization, Password FROM Expert WHERE Email = ?");
+        $stmt = $con->prepare("SELECT ExpertID, Name, Email, Specialization, Bio, Password FROM Expert WHERE Email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();

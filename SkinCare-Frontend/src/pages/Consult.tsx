@@ -458,10 +458,20 @@ const Consult = () => {
                 <p className="text-gray-600 text-sm mb-4">{expert.Bio}</p>
                 <button
                   onClick={() => startConversation(expert.ExpertID)}
-                  disabled={loading || expert.Status !== 'active'}
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  disabled={loading || expert.Status === 'offline'}
+                  className={`w-full text-white py-2 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
+                    expert.Status === 'active' 
+                      ? 'bg-blue-600 hover:bg-blue-700' 
+                      : expert.Status === 'busy'
+                        ? 'bg-yellow-600 hover:bg-yellow-700'
+                        : 'bg-gray-600'
+                  }`}
                 >
-                  {expert.Status === 'active' ? 'Start Consultation' : 'Currently Unavailable'}
+                  {expert.Status === 'active' 
+                    ? 'Start Consultation' 
+                    : expert.Status === 'busy' 
+                      ? 'Start Consultation (Busy)' 
+                      : 'Currently Offline'}
                 </button>
               </div>
             ))}
