@@ -58,7 +58,7 @@ try {
             // Hash password
             $hashedPassword = password_hash($input['password'], PASSWORD_DEFAULT);
             
-            $stmt = $pdo->prepare("INSERT INTO Expert (Name, Email, Specialization, Bio, Password, Status) VALUES (?, ?, ?, ?, ?, 'active')");
+            $stmt = $pdo->prepare("INSERT INTO Expert (Name, Email, Specialization, Bio, Password, Status) VALUES (?, ?, ?, ?, ?, 'offline')");
             $result = $stmt->execute([
                 $input['name'],
                 $input['email'],
