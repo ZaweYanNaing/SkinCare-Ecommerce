@@ -99,6 +99,22 @@ function AccManagement() {
       ]
     },
     {
+      title: 'Expert Accounts',
+      description: 'Manage expert accounts, specializations, and consultation access',
+      icon: Users,
+      path: '/admin/experts',
+      color: 'text-purple-500',
+      bgColor: 'bg-purple-50',
+      borderColor: 'border-purple-200',
+      module: 'account_management' as keyof AdminPermissions,
+      features: [
+        { text: 'Create expert accounts', action: 'create' },
+        { text: 'Manage expert profiles', action: 'update' },
+        { text: 'Update specializations', action: 'update' },
+        { text: 'Delete expert accounts', action: 'delete' }
+      ]
+    },
+    {
       title: 'Admin Accounts',
       description: 'Manage administrator accounts, permissions, and system access',
       icon: Shield,
@@ -146,7 +162,7 @@ function AccManagement() {
           <p className="text-gray-600">Choose the type of accounts you want to manage</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {accountTypes.map((accountType) => {
             const IconComponent = accountType.icon;
             const hasAnyPermission = accountType.features.some(feature => 

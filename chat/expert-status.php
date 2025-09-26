@@ -19,10 +19,9 @@ try {
         }
         
         // Update expert status
-        $stmt = $con->prepare("UPDATE Expert SET Status = ? WHERE ExpertID = ?");
-        $stmt->bind_param("si", $status, $expertID);
+        $stmt = $pdo->prepare("UPDATE Expert SET Status = ? WHERE ExpertID = ?");
         
-        if ($stmt->execute() && $stmt->affected_rows > 0) {
+        if ($stmt->execute([$status, $expertID]) && $stmt->rowCount() > 0) {
             sendResponse(true, [
                 'expertID' => $expertID,
                 'status' => $status

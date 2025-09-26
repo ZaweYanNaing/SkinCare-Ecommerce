@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-include '../db/database.php';
+require_once '../config/database.php';
 
 // Helper function to get current timestamp
 function getCurrentTimestamp() {

@@ -4,14 +4,9 @@ include 'config.php';
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         // Get all active experts
-        $stmt = $con->prepare("SELECT ExpertID, Name, Specialization, Bio, Avatar, Status FROM Expert WHERE Status IN ('active', 'busy') ORDER BY Status ASC, Name ASC");
+        $stmt = $pdo->prepare("SELECT ExpertID, Name, Specialization, Bio, Avatar, Status FROM Expert WHERE Status IN ('active', 'busy') ORDER BY Status ASC, Name ASC");
         $stmt->execute();
-        $result = $stmt->get_result();
-        
-        $experts = [];
-        while ($row = $result->fetch_assoc()) {
-            $experts[] = $row;
-        }
+        $experts = $stmt->fetchAll();
         
         sendResponse(true, $experts);
     }
@@ -27,14 +22,11 @@ try {
         }
         
         // Get expert with password for verification
-        $stmt = $con->prepare("SELECT ExpertID, Name, Email, Specialization, Bio, Password FROM Expert WHERE Email = ?");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt = $pdo->prepare("SELECT ExpertID, Name, Email, Specialization, Bio, Password FROM Expert WHERE Email = ?");
+        $stmt->execute([$email]);
+        $expert = $stmt->fetch();
         
-        if ($result->num_rows === 1) {
-            $expert = $result->fetch_assoc();
-            
+        if ($expert) {
             // Verify password - check both bcrypt and plain text for demo
             $passwordValid = false;
             
@@ -56,9 +48,8 @@ try {
                 unset($expert['Password']);
                 
                 // Update expert status to active
-                $updateStmt = $con->prepare("UPDATE Expert SET Status = 'active' WHERE ExpertID = ?");
-                $updateStmt->bind_param("i", $expert['ExpertID']);
-                $updateStmt->execute();
+                $updateStmt = $pdo->prepare("UPDATE Expert SET Status = 'active' WHERE ExpertID = ?");
+                $updateStmt->execute([$expert['ExpertID']]);
                 
                 sendResponse(true, $expert, 'Login successful');
             } else {

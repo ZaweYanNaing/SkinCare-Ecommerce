@@ -14,6 +14,7 @@ import AdminLogin from '@/pages/admin/Login';
 import AccManagement from '@/pages/admin/AccManagement';
 import CustomerAccounts from '@/pages/admin/CustomerAccounts';
 import AdminAccounts from '@/pages/admin/AdminAccounts';
+import ExpertAccounts from '../pages/admin/ExpertAccounts';
 import Notification from '@/pages/admin/Notification';
 import Overview from '@/pages/admin/Overview';
 import ProductCreate from '@/pages/admin/ProductCreate';
@@ -74,6 +75,10 @@ export const router = createBrowserRouter([
       {
         path: 'admins',
         element: <AdminAccounts />,
+      },
+      {
+        path: 'experts',
+        element: <ExpertAccounts />,
       },
       {
         path: 'productCreate',

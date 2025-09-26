@@ -11,7 +11,7 @@ try {
         }
         
         // Get messages for conversation
-        $stmt = $con->prepare("
+        $stmt = $pdo->prepare("
             SELECT m.*, 
                    CASE 
                        WHEN m.SenderType = 'customer' THEN c.CName
@@ -28,14 +28,8 @@ try {
             WHERE m.ConversationID = ? AND m.MessageID > ?
             ORDER BY m.SentAt ASC
         ");
-        $stmt->bind_param("ii", $conversationID, $lastMessageID);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        $messages = [];
-        while ($row = $result->fetch_assoc()) {
-            $messages[] = $row;
-        }
+        $stmt->execute([$conversationID, $lastMessageID]);
+        $messages = $stmt->fetchAll();
         
         sendResponse(true, $messages);
     }
@@ -54,19 +48,17 @@ try {
         }
         
         // Insert message
-        $stmt = $con->prepare("INSERT INTO Message (ConversationID, SenderType, SenderID, MessageText, MessageType) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("isiss", $conversationID, $senderType, $senderID, $messageText, $messageType);
+        $stmt = $pdo->prepare("INSERT INTO Message (ConversationID, SenderType, SenderID, MessageText, MessageType) VALUES (?, ?, ?, ?, ?)");
         
-        if ($stmt->execute()) {
-            $messageID = $con->insert_id;
+        if ($stmt->execute([$conversationID, $senderType, $senderID, $messageText, $messageType])) {
+            $messageID = $pdo->lastInsertId();
             
             // Update conversation timestamp
-            $updateStmt = $con->prepare("UPDATE Conversation SET UpdatedAt = CURRENT_TIMESTAMP WHERE ConversationID = ?");
-            $updateStmt->bind_param("i", $conversationID);
-            $updateStmt->execute();
+            $updateStmt = $pdo->prepare("UPDATE Conversation SET UpdatedAt = CURRENT_TIMESTAMP WHERE ConversationID = ?");
+            $updateStmt->execute([$conversationID]);
             
             // Get the sent message with sender info
-            $getStmt = $con->prepare("
+            $getStmt = $pdo->prepare("
                 SELECT m.*, 
                        CASE 
                            WHEN m.SenderType = 'customer' THEN c.CName
@@ -82,10 +74,8 @@ try {
                 LEFT JOIN Expert e ON conv.ExpertID = e.ExpertID
                 WHERE m.MessageID = ?
             ");
-            $getStmt->bind_param("i", $messageID);
-            $getStmt->execute();
-            $messageResult = $getStmt->get_result();
-            $message = $messageResult->fetch_assoc();
+            $getStmt->execute([$messageID]);
+            $message = $getStmt->fetch();
             
             sendResponse(true, $message, 'Message sent');
         } else {
@@ -105,10 +95,9 @@ try {
         
         // Mark messages as read (opposite sender type)
         $oppositeSenderType = $senderType === 'customer' ? 'expert' : 'customer';
-        $stmt = $con->prepare("UPDATE Message SET IsRead = 1 WHERE ConversationID = ? AND SenderType = ?");
-        $stmt->bind_param("is", $conversationID, $oppositeSenderType);
+        $stmt = $pdo->prepare("UPDATE Message SET IsRead = 1 WHERE ConversationID = ? AND SenderType = ?");
         
-        if ($stmt->execute()) {
+        if ($stmt->execute([$conversationID, $oppositeSenderType])) {
             sendResponse(true, null, 'Messages marked as read');
         } else {
             sendResponse(false, null, 'Failed to mark messages as read');

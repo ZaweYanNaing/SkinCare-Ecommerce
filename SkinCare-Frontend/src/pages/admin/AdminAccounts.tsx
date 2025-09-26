@@ -13,6 +13,7 @@ interface Admin {
   AdminID: number;
   Type: string;
   Email: string;
+  RoleDescription?: string;
   CreatedDate: string;
   LastLogin: string;
 }
@@ -268,12 +269,17 @@ function AdminAccounts() {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="type">Admin Type</Label>
-                      <Input
+                      <select
                         id="type"
                         value={formData.type}
                         onChange={(e) => setFormData({...formData, type: e.target.value})}
-                        placeholder="e.g., Super Admin, Manager, etc."
-                      />
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Select admin type...</option>
+                        <option value="Super Admin">Super Admin</option>
+                        <option value="Manager">Manager</option>
+                        <option value="Staff">Staff</option>
+                      </select>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email">Email</Label>
@@ -295,6 +301,7 @@ function AdminAccounts() {
                         placeholder="Enter password"
                       />
                     </div>
+
                   </div>
                   <DialogFooter>
                     <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
@@ -337,9 +344,17 @@ function AdminAccounts() {
                         </div>
                       </td>
                       <td className="p-3">
-                        <Badge variant={admin.Type.toLowerCase().includes('super') ? 'destructive' : 'default'}>
+                        <Badge variant={
+                          admin.Type.toLowerCase().includes('super') ? 'destructive' : 
+                          admin.Type === 'Expert' ? 'secondary' : 'default'
+                        }>
                           {admin.Type}
                         </Badge>
+                        {admin.Type === 'Expert' && admin.RoleDescription && (
+                          <div className="text-xs text-gray-500 mt-1 truncate max-w-32">
+                            {admin.RoleDescription}
+                          </div>
+                        )}
                       </td>
                       <td className="p-3">{admin.Email}</td>
                       <td className="p-3 text-sm text-gray-500">
@@ -395,12 +410,17 @@ function AdminAccounts() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="editType">Admin Type</Label>
-              <Input
+              <select
                 id="editType"
                 value={formData.type}
                 onChange={(e) => setFormData({...formData, type: e.target.value})}
-                placeholder="e.g., Super Admin, Manager, etc."
-              />
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select admin type...</option>
+                <option value="Super Admin">Super Admin</option>
+                <option value="Manager">Manager</option>
+                <option value="Staff">Staff</option>
+              </select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="editEmail">Email</Label>
@@ -422,6 +442,7 @@ function AdminAccounts() {
                 placeholder="Leave empty to keep current password"
               />
             </div>
+
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>

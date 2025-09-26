@@ -8,7 +8,7 @@ try {
         
         if ($customerID) {
             // Get conversations for customer
-            $stmt = $con->prepare("
+            $stmt = $pdo->prepare("
                 SELECT c.*, e.Name as ExpertName, e.Specialization, e.Avatar as ExpertAvatar,
                        (SELECT COUNT(*) FROM Message m WHERE m.ConversationID = c.ConversationID AND m.SenderType = 'expert' AND m.IsRead = 0) as UnreadCount
                 FROM Conversation c 
@@ -16,10 +16,10 @@ try {
                 WHERE c.CustomerID = ? 
                 ORDER BY c.UpdatedAt DESC
             ");
-            $stmt->bind_param("i", $customerID);
+            $stmt->execute([$customerID]);
         } else if ($expertID) {
             // Get conversations for expert
-            $stmt = $con->prepare("
+            $stmt = $pdo->prepare("
                 SELECT c.*, cu.CName as CustomerName,
                        (SELECT COUNT(*) FROM Message m WHERE m.ConversationID = c.ConversationID AND m.SenderType = 'customer' AND m.IsRead = 0) as UnreadCount
                 FROM Conversation c 
@@ -27,19 +27,12 @@ try {
                 WHERE c.ExpertID = ? OR (c.ExpertID IS NULL AND c.Status = 'waiting')
                 ORDER BY c.UpdatedAt DESC
             ");
-            $stmt->bind_param("i", $expertID);
+            $stmt->execute([$expertID]);
         } else {
             sendResponse(false, null, 'CustomerID or ExpertID required');
         }
         
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        $conversations = [];
-        while ($row = $result->fetch_assoc()) {
-            $conversations[] = $row;
-        }
-        
+        $conversations = $stmt->fetchAll();
         sendResponse(true, $conversations);
     }
     
@@ -55,35 +48,30 @@ try {
         
         // Check if there's already an active conversation with this specific expert
         if ($expertID) {
-            $checkStmt = $con->prepare("SELECT ConversationID FROM Conversation WHERE CustomerID = ? AND ExpertID = ? AND Status IN ('waiting', 'active')");
-            $checkStmt->bind_param("ii", $customerID, $expertID);
-            $checkStmt->execute();
-            $checkResult = $checkStmt->get_result();
+            $checkStmt = $pdo->prepare("SELECT ConversationID FROM Conversation WHERE CustomerID = ? AND ExpertID = ? AND Status IN ('waiting', 'active')");
+            $checkStmt->execute([$customerID, $expertID]);
+            $existing = $checkStmt->fetch();
             
-            if ($checkResult->num_rows > 0) {
-                $existing = $checkResult->fetch_assoc();
+            if ($existing) {
                 sendResponse(true, ['conversationID' => $existing['ConversationID']], 'Using existing conversation with this expert');
             }
         } else {
             // For quick consultation (no specific expert), check for any waiting conversation
-            $checkStmt = $con->prepare("SELECT ConversationID FROM Conversation WHERE CustomerID = ? AND Status = 'waiting' AND ExpertID IS NULL");
-            $checkStmt->bind_param("i", $customerID);
-            $checkStmt->execute();
-            $checkResult = $checkStmt->get_result();
+            $checkStmt = $pdo->prepare("SELECT ConversationID FROM Conversation WHERE CustomerID = ? AND Status = 'waiting' AND ExpertID IS NULL");
+            $checkStmt->execute([$customerID]);
+            $existing = $checkStmt->fetch();
             
-            if ($checkResult->num_rows > 0) {
-                $existing = $checkResult->fetch_assoc();
+            if ($existing) {
                 sendResponse(true, ['conversationID' => $existing['ConversationID']], 'Using existing waiting conversation');
             }
         }
         
         // Create new conversation
-        $stmt = $con->prepare("INSERT INTO Conversation (CustomerID, ExpertID, Status) VALUES (?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO Conversation (CustomerID, ExpertID, Status) VALUES (?, ?, ?)");
         $status = $expertID ? 'active' : 'waiting';
-        $stmt->bind_param("iis", $customerID, $expertID, $status);
         
-        if ($stmt->execute()) {
-            $conversationID = $con->insert_id;
+        if ($stmt->execute([$customerID, $expertID, $status])) {
+            $conversationID = $pdo->lastInsertId();
             sendResponse(true, ['conversationID' => $conversationID], 'Conversation created');
         } else {
             sendResponse(false, null, 'Failed to create conversation');
@@ -125,10 +113,9 @@ try {
         $types .= 'i';
         
         $sql = "UPDATE Conversation SET " . implode(', ', $updates) . " WHERE ConversationID = ?";
-        $stmt = $con->prepare($sql);
-        $stmt->bind_param($types, ...$params);
+        $stmt = $pdo->prepare($sql);
         
-        if ($stmt->execute()) {
+        if ($stmt->execute($params)) {
             sendResponse(true, null, 'Conversation updated');
         } else {
             sendResponse(false, null, 'Failed to update conversation');

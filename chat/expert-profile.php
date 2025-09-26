@@ -10,13 +10,11 @@ try {
         
         $expertID = $_GET['expertID'];
         
-        $stmt = $con->prepare("SELECT ExpertID, Name, Email, Specialization, Bio, Status FROM Expert WHERE ExpertID = ?");
-        $stmt->bind_param("i", $expertID);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt = $pdo->prepare("SELECT ExpertID, Name, Email, Specialization, Bio, Status FROM Expert WHERE ExpertID = ?");
+        $stmt->execute([$expertID]);
+        $expertData = $stmt->fetch();
         
-        if ($result->num_rows === 1) {
-            $expertData = $result->fetch_assoc();
+        if ($expertData) {
             sendResponse(true, $expertData);
         } else {
             sendResponse(false, null, 'Expert not found');
@@ -55,30 +53,25 @@ try {
         }
         
         // Check if email is already used by another expert
-        $stmt = $con->prepare("SELECT ExpertID FROM Expert WHERE Email = ? AND ExpertID != ?");
-        $stmt->bind_param("si", $email, $expertID);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt = $pdo->prepare("SELECT ExpertID FROM Expert WHERE Email = ? AND ExpertID != ?");
+        $stmt->execute([$email, $expertID]);
         
-        if ($result->num_rows > 0) {
+        if ($stmt->fetch()) {
             sendResponse(false, null, 'Email is already in use by another expert');
         }
         
         // Update expert profile
-        $stmt = $con->prepare("
+        $stmt = $pdo->prepare("
             UPDATE Expert 
             SET Name = ?, Email = ?, Specialization = ?, Bio = ?, Status = ?
             WHERE ExpertID = ?
         ");
-        $stmt->bind_param("sssssi", $name, $email, $specialization, $bio, $status, $expertID);
         
-        if ($stmt->execute() && $stmt->affected_rows > 0) {
+        if ($stmt->execute([$name, $email, $specialization, $bio, $status, $expertID]) && $stmt->rowCount() > 0) {
             // Fetch updated expert data
-            $stmt = $con->prepare("SELECT ExpertID, Name, Email, Specialization, Bio, Status FROM Expert WHERE ExpertID = ?");
-            $stmt->bind_param("i", $expertID);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $expertData = $result->fetch_assoc();
+            $stmt = $pdo->prepare("SELECT ExpertID, Name, Email, Specialization, Bio, Status FROM Expert WHERE ExpertID = ?");
+            $stmt->execute([$expertID]);
+            $expertData = $stmt->fetch();
             
             sendResponse(true, $expertData, 'Profile updated successfully');
         } else {
