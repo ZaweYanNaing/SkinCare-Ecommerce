@@ -110,16 +110,16 @@ const NewProductSection: React.FC = () => {
   const userId = user.id;
 
   return (
-    <section className="py-16 bg-white">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="mb-12">
-          <h2 className="mb-4 text-4xl font-bold text-gray-900">New Products</h2>
-          <p className="max-w-2xl text-lg text-gray-600">
+    <section className="py-8 sm:py-12 lg:py-16 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8 lg:mb-12 text-center lg:text-left">
+          <h2 className="mb-4 text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">New Products</h2>
+          <p className="max-w-2xl mx-auto lg:mx-0 text-base sm:text-lg text-gray-600">
             Explore our newest additions to the skincare line, crafted with the finest ingredients and latest innovations.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 sm:gap-8">
           {products.map((product) => (
             <div key={product.ProductID} className="group relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-500 hover:scale-[1.02] hover:shadow-xl">
               <div className="absolute top-2 left-2 z-10">
@@ -132,19 +132,19 @@ const NewProductSection: React.FC = () => {
                 <img 
                   src={`../../src/assets/${product.Image}`} 
                   alt={product.Name} 
-                  className="h-64 w-full object-cover"
+                  className="h-48 sm:h-56 lg:h-64 w-full object-cover"
                 />
               </Link>
               
-              <div className="p-6">
-                <h3 className="mb-2 text-xl font-semibold text-gray-900 line-clamp-1">
+              <div className="p-4 sm:p-6">
+                <h3 className="mb-2 text-lg sm:text-xl font-semibold text-gray-900 line-clamp-1">
                   {product.Name}
                 </h3>
                 <p className="text-sm text-gray-600 mb-2 line-clamp-2">
                   {product.Description}
                 </p>
                 
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-1">
                   <span className="text-lg font-bold text-green-600">
                     {product.Price.toLocaleString()} MMK
                   </span>
@@ -164,8 +164,24 @@ const NewProductSection: React.FC = () => {
                 )}
               </div>
 
-              {/* Hover Actions */}
-              <div className="absolute top-2.5 right-2.5 z-10 flex flex-col space-y-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+              {/* Mobile Action Buttons */}
+              <div className="sm:hidden absolute bottom-4 right-4 flex space-x-2">
+                <button
+                  onClick={() => addToWishlist(userId, product.ProductID)}
+                  className="bg-white rounded-full p-2 shadow-md hover:shadow-lg"
+                >
+                  <LiaHeart className="text-lg text-gray-600 hover:text-red-500" />
+                </button>
+                <button
+                  onClick={() => addToCart(product)}
+                  className="bg-white rounded-full p-2 shadow-md hover:shadow-lg"
+                >
+                  <AiOutlineShoppingCart className="text-lg text-gray-600 hover:text-green-500" />
+                </button>
+              </div>
+
+              {/* Desktop Hover Actions */}
+              <div className="hidden sm:flex absolute top-2.5 right-2.5 z-10 flex-col space-y-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                 <div className="group/wish cursor-pointer rounded-full bg-white p-2 shadow-md hover:shadow-lg">
                   <LiaHeart
                     className="text-lg text-gray-600 transition-all duration-300 group-hover/wish:scale-110 group-hover/wish:text-red-500"

@@ -2,16 +2,16 @@ import React from 'react';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="z-50 bg-gray-900 px-10 py-12 text-gray-300">
-      <div className="flex max-w-full gap-8">
+    <footer className="z-50 bg-gray-900 px-4 sm:px-6 lg:px-10 py-8 sm:py-12 text-gray-300">
+      <div className="flex flex-col lg:flex-row max-w-full gap-6 lg:gap-8">
         {/* Company Info */}
-        <div className="flex w-1/3 flex-col gap-y-3.5 text-center">
+        <div className="flex w-full lg:w-1/3 flex-col gap-y-3.5 text-center lg:text-left">
           <h3 className="mb-4 text-lg font-semibold text-white">Skincare</h3>
           <p className="text-sm">Dedicated to providing you with the best skincare products for a healthier, more radiant you.</p>
         </div>
 
         {/* Contact Us */}
-        <div className="flex w-1/3 flex-col gap-y-3.5 text-center">
+        <div className="flex w-full lg:w-1/3 flex-col gap-y-3.5 text-center lg:text-left">
           <h3 className="mb-4 text-lg font-semibold text-white">Contact Us</h3>
           <p className="text-sm">123 Skincare Lane, Beauty City, BC 12345</p>
           <p className="text-sm">Email: info@skincare.com</p>
@@ -19,20 +19,20 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Newsletter */}
-        <div className="w-1/3 text-center">
+        <div className="w-full lg:w-1/3 text-center lg:text-left">
           <h3 className="mb-4 text-lg font-semibold text-white">News Letter</h3>
           <p className="mb-4 text-sm">Subscribe to our newsletter for exclusive offers and updates.</p>
-          <form className="flex">
+          <form className="flex flex-col sm:flex-row gap-2 sm:gap-0">
             <input
               type="email"
               placeholder="Your email address"
-              className="flex-grow rounded-l-md bg-white p-2 text-gray-900 focus:ring-0 focus:outline-none"
+              className="flex-grow rounded-md sm:rounded-l-md sm:rounded-r-none bg-white p-2 text-gray-900 focus:ring-0 focus:outline-none text-sm"
             />
-            <button type="submit" className="rounded-r-md bg-[#039963] p-2 text-white transition duration-300 hover:bg-green-700">
+            <button type="submit" className="rounded-md sm:rounded-r-md sm:rounded-l-none bg-[#039963] p-2 text-white transition duration-300 hover:bg-green-700 text-sm font-medium">
               Subscribe
             </button>
           </form>
-          <div className="mt-6 flex w-full justify-center space-x-4">
+          <div className="mt-6 flex w-full justify-center lg:justify-start space-x-4">
             <a href="#" className="text-gray-400 transition duration-300 hover:text-white">
               {/* Facebook Icon */}
               <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -62,7 +62,7 @@ const Footer: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="mt-8 border-t border-gray-700 pt-8 text-center text-sm">
+      <div className="mt-6 sm:mt-8 border-t border-gray-700 pt-6 sm:pt-8 text-center text-sm">
         <p>&copy; {new Date().getFullYear()} Skincare. All rights reserved.</p>
       </div>
     </footer>

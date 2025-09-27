@@ -4,6 +4,7 @@ import { LuMaximize2 } from 'react-icons/lu';
 import { Link } from 'react-router';
 import { toast } from 'react-toastify';
 import type { Product } from '../types/Product';
+import { Package, Star } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -35,18 +36,13 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   let addToCart = (product: Product) => {
     try {
-      // Get existing cart from localStorage
       const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
-
-      // Check if product already exists in cart
       const existingProductIndex = existingCart.findIndex((item: any) => item.ProductID === product.ProductID);
 
       if (existingProductIndex !== -1) {
-        // If product exists, increment quantity
         existingCart[existingProductIndex].quantity += 1;
         toast.success('Product quantity updated in cart!');
       } else {
-        // If product doesn't exist, add new item with quantity 1
         const cartItem = {
           ...product,
           quantity: 1,
@@ -56,60 +52,117 @@ export default function ProductCard({ product }: ProductCardProps) {
         toast.success('Product added to cart!');
       }
 
-      // Save updated cart to localStorage
       localStorage.setItem('cart', JSON.stringify(existingCart));
-
-      // Dispatch custom event to update cart in navbar
       window.dispatchEvent(new Event('cartUpdated'));
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast.error('Failed to add product to cart!');
     }
   };
+
   return (
-    <div key={product.ProductID} className="group relative h-96 w-full rounded-lg transition-all duration-500 hover:scale-[1.01] hover:shadow-xl">
-      <div className="h-full w-full rounded-lg bg-white shadow-md">
-        <Link to={`/products/${product.ProductID}`}>
-          <img src={`../../src/assets/${product.Image}`} alt="image" className="h-64 w-full rounded-t-lg object-cover" />
-        </Link>
-        <div className="p-6">
-          <h3 className="mb-2 text-xl font-semibold text-gray-900">{product.Name}</h3>
-          <p className="text-sm text-green-600">{product.Description}</p>
+    <div className="group relative bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
+      {/* Stock Badge */}
+      {product.Stock === 0 && (
+        <div className="absolute top-2 left-2 z-20 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+          Out of Stock
         </div>
-        {/* Heart Icon - Always visible */}
-        <div className="absolute top-2.5 right-2.5 z-10 cursor-pointer rounded-full p-2">
-          {' '}
-          {/* Added z-10 to ensure it's above the overlay */}
-          <LiaHeart className="text-lg text-gray-600" />
+      )}
+
+      {/* Product Image */}
+      <Link to={`/products/${product.ProductID}`}>
+        <div className="relative overflow-hidden">
+          <img 
+            src={`../../src/assets/${product.Image}`} 
+            alt={product.Name}
+            className="w-full h-48 sm:h-56 object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          {product.Stock === 0 && (
+            <div className="absolute inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
+              <span className="text-white font-medium">Out of Stock</span>
+            </div>
+          )}
+        </div>
+      </Link>
+
+      {/* Product Info */}
+      <div className="p-4">
+        <Link to={`/products/${product.ProductID}`}>
+          <h3 className="font-semibold text-gray-900 hover:text-green-600 transition-colors line-clamp-2 mb-2">
+            {product.Name}
+          </h3>
+        </Link>
+        
+        <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+          {product.Description}
+        </p>
+
+        {/* Product Details */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-1 text-xs text-gray-500">
+            <Package className="h-3 w-3" />
+            <span>{product.ForSkinType}</span>
+          </div>
+          <div className="flex items-center gap-1 text-xs text-gray-500">
+            <span className={`w-2 h-2 rounded-full ${product.Stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></span>
+            <span>{product.Stock > 0 ? 'In Stock' : 'Out of Stock'}</span>
+          </div>
         </div>
 
-        {/* Hover Overlay with Icons */}
-        <div className="absolute top-2.5 right-2.5 z-10 flex w-full flex-col items-end justify-center space-y-3 opacity-0 transition-opacity duration-800 group-hover:opacity-100">
-          <div className="group/wish cursor-pointer rounded-full bg-white p-2 hover:shadow-md">
-            <LiaHeart
-              className="text-lg text-gray-600 transition-all duration-500 group-hover/wish:scale-[1.08] group-hover/wish:text-green-500"
-              onClick={() => addToWishlist(userId, product.ProductID)} // Assuming a placeholder userId of 1
-            />
-            <p className="shdow-md absolute top-1.5 right-10 rounded-[4px] bg-black px-2 py-1.5 text-xs text-white opacity-0 transition-opacity duration-600 group-hover/wish:opacity-100">
-              Wish List
-            </p>
-          </div>
-          <div className="group/cart cursor-pointer rounded-full bg-white p-2 hover:shadow-md">
-            <AiOutlineShoppingCart
-              onClick={() => addToCart(product)}
-              className="text-lg text-gray-600 transition-all duration-500 group-hover/cart:scale-[1.08] group-hover/cart:text-green-500"
-            />
-            <p className="shdow-md absolute top-13 right-10 rounded-[4px] bg-black px-2 py-1.5 text-xs text-white opacity-0 transition-opacity duration-600 group-hover/cart:opacity-100">
-              Add Cart
-            </p>
-          </div>
-          <div className="group/preview cursor-pointer rounded-full bg-white p-2 hover:shadow-md">
-            <LuMaximize2 className="text-lg text-gray-600 transition-all duration-500 group-hover/preview:scale-[1.08] group-hover/preview:text-green-500" />
-            <p className="shdow-md absolute top-24.5 right-10 rounded-[4px] bg-black px-2 py-1.5 text-xs text-white opacity-0 transition-opacity duration-600 group-hover/preview:opacity-100">
-              Preview
-            </p>
-          </div>
+        {/* Price */}
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-lg font-bold text-green-600">
+            {product.Price.toLocaleString()} MMK
+          </span>
         </div>
+
+        {/* Mobile Actions - Always Visible */}
+        <div className="sm:hidden flex gap-2">
+          <button
+            onClick={() => addToWishlist(userId, product.ProductID)}
+            className="flex-1 flex items-center justify-center gap-2 py-2 px-3 border border-gray-300 rounded-lg hover:border-red-300 hover:bg-red-50 transition-colors"
+          >
+            <LiaHeart className="h-4 w-4" />
+            <span className="text-sm">Wishlist</span>
+          </button>
+          
+          <button
+            onClick={() => addToCart(product)}
+            disabled={product.Stock === 0}
+            className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+          >
+            <AiOutlineShoppingCart className="h-4 w-4" />
+            <span className="text-sm">Add Cart</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Desktop Hover Actions */}
+      <div className="hidden sm:flex absolute top-2 right-2 z-10 flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <button
+          onClick={() => addToWishlist(userId, product.ProductID)}
+          className="p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow group/wish"
+          title="Add to Wishlist"
+        >
+          <LiaHeart className="h-5 w-5 text-gray-600 group-hover/wish:text-red-500 transition-colors" />
+        </button>
+        
+        <button
+          onClick={() => addToCart(product)}
+          disabled={product.Stock === 0}
+          className="p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow group/cart disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Add to Cart"
+        >
+          <AiOutlineShoppingCart className="h-5 w-5 text-gray-600 group-hover/cart:text-green-500 transition-colors" />
+        </button>
+        
+        <Link
+          to={`/products/${product.ProductID}`}
+          className="p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow group/preview"
+          title="Quick View"
+        >
+          <LuMaximize2 className="h-5 w-5 text-gray-600 group-hover/preview:text-blue-500 transition-colors" />
+        </Link>
       </div>
     </div>
   );
