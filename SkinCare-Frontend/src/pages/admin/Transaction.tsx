@@ -384,12 +384,12 @@ function Transaction() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-6">
-      <div className="mb-8 flex items-center justify-between">
+    <div className="w-full max-w-7xl mx-auto p-4 sm:p-6">
+      <div className="mb-6 sm:mb-8">
         <div className="flex items-center">
-          <Separator orientation="vertical" className="mr-4 h-6" />
+          <Separator orientation="vertical" className="mr-4 h-6 hidden sm:block" />
           <Breadcrumb>
-            <BreadcrumbList className="text-[1rem]">
+            <BreadcrumbList className="text-sm sm:text-base">
               <BreadcrumbItem className="hidden md:block">
                 <BreadcrumbLink href="/admin">Dashboard</BreadcrumbLink>
               </BreadcrumbItem>
@@ -403,92 +403,80 @@ function Transaction() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-6 mb-6 sm:mb-8">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">
                   Total Revenue
                   {(searchTerm || statusFilter !== 'all' || dateFrom || dateTo) && (
-                    <span className="text-xs text-gray-500 ml-1">(filtered)</span>
+                    <span className="text-xs text-gray-500 ml-1 hidden sm:inline">(filtered)</span>
                   )}
                 </p>
-                <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.totalRevenue)}</p>
+                <p className="text-lg sm:text-2xl font-bold text-green-600 truncate">{formatCurrency(stats.totalRevenue)}</p>
               </div>
-              <DollarSign className="h-8 w-8 text-green-500" />
+              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Orders</p>
-                <p className="text-2xl font-bold">{stats.totalOrders}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Total Orders</p>
+                <p className="text-lg sm:text-2xl font-bold">{stats.totalOrders}</p>
               </div>
-              <ShoppingCart className="h-8 w-8 text-blue-500" />
+              <ShoppingCart className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Pending Orders</p>
-                <p className="text-2xl font-bold text-orange-600">{stats.pendingOrders}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Pending</p>
+                <p className="text-lg sm:text-2xl font-bold text-orange-600">{stats.pendingOrders}</p>
               </div>
-              <Calendar className="h-8 w-8 text-orange-500" />
+              <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-orange-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Confirmed Orders</p>
-                <p className="text-2xl font-bold text-blue-600">{stats.confirmedOrders}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Confirmed</p>
+                <p className="text-lg sm:text-2xl font-bold text-blue-600">{stats.confirmedOrders}</p>
               </div>
-              <ShoppingCart className="h-8 w-8 text-blue-500" />
+              <ShoppingCart className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Shipped Orders</p>
-                <p className="text-2xl font-bold text-purple-600">{stats.shippedOrders}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Shipped</p>
+                <p className="text-lg sm:text-2xl font-bold text-purple-600">{stats.shippedOrders}</p>
               </div>
-              <Truck className="h-8 w-8 text-purple-500" />
+              <Truck className="h-6 w-6 sm:h-8 sm:w-8 text-purple-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Delivered Orders</p>
-                <p className="text-2xl font-bold text-green-600">{stats.deliveredOrders}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Delivered</p>
+                <p className="text-lg sm:text-2xl font-bold text-green-600">{stats.deliveredOrders}</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-green-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Cancelled Orders</p>
-                <p className="text-2xl font-bold text-red-600">{stats.cancelledOrders}</p>
-              </div>
-              <X className="h-8 w-8 text-red-500" />
+              <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
@@ -532,7 +520,7 @@ function Transaction() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="space-y-2">
               <Label htmlFor="search">Search</Label>
               <div className="relative">
@@ -596,7 +584,7 @@ function Transaction() {
       {/* Transactions Table */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <CardTitle>Transaction History</CardTitle>
               <CardDescription>View and manage all customer transactions</CardDescription>
@@ -604,11 +592,11 @@ function Transaction() {
             <div className="flex gap-2">
               <Button onClick={fetchTransactions} variant="outline" size="sm" className="flex items-center gap-2">
                 <RefreshCw className="h-4 w-4" />
-                Refresh
+                <span className="hidden sm:inline">Refresh</span>
               </Button>
               <Button onClick={() => setIsExportDialogOpen(true)} variant="outline" className="flex items-center gap-2">
                 <Download className="h-4 w-4" />
-                Export
+                <span className="hidden sm:inline">Export</span>
               </Button>
             </div>
           </div>
@@ -623,7 +611,8 @@ function Transaction() {
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
+              {/* Desktop Table View */}
+              <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b">
@@ -689,6 +678,78 @@ function Transaction() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="lg:hidden space-y-4">
+                {transactions.map((transaction) => (
+                  <div key={transaction.OrderID} className="border rounded-lg p-4 bg-white hover:bg-gray-50 transition-colors">
+                    {/* Header with order ID and status */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="font-medium text-base">Order #{transaction.OrderID}</h3>
+                        <p className="text-sm text-gray-500">{formatDate(transaction.orderDate)}</p>
+                      </div>
+                      <Badge 
+                        variant={getStatusBadgeVariant(transaction.status)}
+                        className={getStatusBadgeStyle(transaction.status)}
+                      >
+                        {transaction.status}
+                      </Badge>
+                    </div>
+
+                    {/* Customer info */}
+                    <div className="mb-3">
+                      <p className="text-sm text-gray-500">Customer</p>
+                      <p className="font-medium">{transaction.customerName || 'N/A'}</p>
+                      <p className="text-sm text-gray-600 break-all">{transaction.customerEmail}</p>
+                    </div>
+
+                    {/* Transaction details */}
+                    <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                      <div>
+                        <p className="text-gray-500">Items</p>
+                        <p className="font-medium">{transaction.itemCount} items</p>
+                        <p className="text-xs text-gray-400 truncate" title={transaction.items}>
+                          {transaction.items}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Amount</p>
+                        <p className="font-medium text-green-600">{formatCurrency(transaction.totalAmount)}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-gray-500">Payment Method</p>
+                        <p className="font-medium">{transaction.paymentMethod}</p>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-2 pt-3 border-t">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => fetchTransactionDetails(transaction.OrderID)}
+                        className="flex-1"
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        View
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedOrderId(transaction.OrderID);
+                          setNewStatus(transaction.status);
+                          setIsStatusUpdateDialogOpen(true);
+                        }}
+                        className="flex-1"
+                      >
+                        Update Status
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
 
               {/* Pagination */}
