@@ -7,9 +7,9 @@ import ProductSearch from '../components/ProductSearch';
 import ProductSkeleton from '../components/ProductSkeleton';
 import { NavContext } from '../contexts/NavContext';
 import type { Product } from '../types/Product';
-import { Filter, X, ChevronDown, Grid, List, SlidersHorizontal } from 'lucide-react';
+import { Filter, Grid, List, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function Product() {
@@ -167,60 +167,60 @@ export default function Product() {
   const { setShowNavBar } = useContext<any>(NavContext);
 
   const FilterSection = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 py-2">
       {/* Filter Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 pb-4">
+      <div className="flex items-center justify-between border-b border-gray-200 pb-4 px-1">
         <h2 className="flex items-center gap-2 text-lg font-semibold">
           <Filter className="h-5 w-5" />
           Filters
         </h2>
-        <button onClick={clearAllFilters} className="text-sm text-green-600 hover:text-green-700 font-medium">
+        <button onClick={clearAllFilters} className="text-sm text-green-600 hover:text-green-700 font-medium px-2 py-1 rounded hover:bg-green-50">
           Clear All
         </button>
       </div>
 
       {/* Category Section */}
-      <div className="space-y-3">
-        <h3 className="font-medium text-gray-900">Category</h3>
-        <div className="space-y-2 max-h-48 overflow-y-auto">
+      <div className="space-y-4 px-1">
+        <h3 className="font-medium text-gray-900 text-base">Category</h3>
+        <div className="space-y-3 max-h-48 overflow-y-auto pr-2">
           {categoriesList.map((category) => (
-            <label key={category} className="flex items-center space-x-3 cursor-pointer">
+            <label key={category} className="flex items-center space-x-3 cursor-pointer py-1 px-2 rounded hover:bg-gray-50 transition-colors">
               <input
                 type="checkbox"
                 value={category}
                 checked={categories.includes(category)}
                 onChange={handleCategoryChange}
-                className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500 flex-shrink-0"
               />
-              <span className="text-sm text-gray-700">{category}</span>
+              <span className="text-sm text-gray-700 select-none">{category}</span>
             </label>
           ))}
         </div>
       </div>
 
       {/* Skin Type Section */}
-      <div className="space-y-3">
-        <h3 className="font-medium text-gray-900">Skin Type</h3>
-        <div className="space-y-2">
+      <div className="space-y-4 px-1">
+        <h3 className="font-medium text-gray-900 text-base">Skin Type</h3>
+        <div className="space-y-3">
           {skinTypesList.map((skinType) => (
-            <label key={skinType} className="flex items-center space-x-3 cursor-pointer">
+            <label key={skinType} className="flex items-center space-x-3 cursor-pointer py-1 px-2 rounded hover:bg-gray-50 transition-colors">
               <input
                 type="checkbox"
                 value={skinType}
                 checked={skinTypes.includes(skinType)}
                 onChange={handleSkinTypeChange}
-                className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500 flex-shrink-0"
               />
-              <span className="text-sm text-gray-700">{skinType}</span>
+              <span className="text-sm text-gray-700 select-none">{skinType}</span>
             </label>
           ))}
         </div>
       </div>
 
       {/* Price Range */}
-      <div className="space-y-3">
-        <h3 className="font-medium text-gray-900">Price Range</h3>
-        <div className="text-sm text-gray-600">
+      <div className="space-y-3 px-1">
+        <h3 className="font-medium text-gray-900 text-base">Price Range</h3>
+        <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
           {priceRange.min.toLocaleString()} - {priceRange.max.toLocaleString()} MMK
         </div>
       </div>
@@ -277,12 +277,12 @@ export default function Product() {
     <div className="min-h-screen bg-gray-50">
       {/* Mobile Filter Sheet */}
       <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
-        <SheetContent side="left" className="w-80">
-          <SheetHeader>
+        <SheetContent side="left" className="w-80 px-4 sm:px-6">
+          <SheetHeader className="px-2">
             <SheetTitle>Filters</SheetTitle>
             <SheetDescription>Filter products by category and skin type</SheetDescription>
           </SheetHeader>
-          <div className="mt-6">
+          <div className="mt-6 px-2">
             <FilterSection />
           </div>
         </SheetContent>

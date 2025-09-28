@@ -391,79 +391,52 @@ function WishList() {
               </div>
 
               {/* Controls */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  {/* Bulk Actions */}
-                  {selectedItems.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-600">
-                        {selectedItems.length} selected
-                      </span>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            Remove
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Remove Selected Items</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to remove {selectedItems.length} items from your wishlist?
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={removeSelectedItems}>
-                              Remove
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  )}
+              <div className="space-y-4">
+                {/* Top Row - Bulk Actions and Select All */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                    {/* Bulk Actions */}
+                    {selectedItems.length > 0 && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-600">
+                          {selectedItems.length} selected
+                        </span>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              <span className="hidden sm:inline">Remove</span>
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Remove Selected Items</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to remove {selectedItems.length} items from your wishlist?
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={removeSelectedItems}>
+                                Remove
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    )}
 
-                  {/* Select All */}
-                  <button
-                    onClick={selectAllItems}
-                    className="text-sm text-green-600 hover:text-green-700"
-                  >
-                    {selectedItems.length === filteredItems.length ? 'Deselect All' : 'Select All'}
-                  </button>
-                </div>
+                    {/* Select All */}
+                    <button
+                      onClick={selectAllItems}
+                      className="text-sm text-green-600 hover:text-green-700 font-medium"
+                    >
+                      {selectedItems.length === filteredItems.length ? 'Deselect All' : 'Select All'}
+                    </button>
+                  </div>
 
-                <div className="flex items-center gap-4">
-                  {/* Filters and Sort */}
-                  <Select value={filterBy} onValueChange={setFilterBy}>
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Filter by" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Items</SelectItem>
-                      <SelectItem value="in-stock">In Stock</SelectItem>
-                      <SelectItem value="out-of-stock">Out of Stock</SelectItem>
-                      <SelectItem value="oily">Oily Skin</SelectItem>
-                      <SelectItem value="dry">Dry Skin</SelectItem>
-                      <SelectItem value="combination">Combination Skin</SelectItem>
-                      <SelectItem value="sensitive">Sensitive Skin</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Sort by" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="newest">Newest First</SelectItem>
-                      <SelectItem value="name">Name (A-Z)</SelectItem>
-                      <SelectItem value="price-low">Price (Low to High)</SelectItem>
-                      <SelectItem value="price-high">Price (High to Low)</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  {/* View Mode Toggle */}
-                  <div className="hidden sm:flex border rounded-lg p-1">
+                  {/* View Mode Toggle - Mobile */}
+                  <div className="flex sm:hidden border rounded-lg p-1 self-start">
                     <button
                       onClick={() => setViewMode('grid')}
                       className={`p-2 rounded ${viewMode === 'grid' ? 'bg-green-100 text-green-600' : 'text-gray-400'}`}
@@ -477,15 +450,65 @@ function WishList() {
                       <List className="h-4 w-4" />
                     </button>
                   </div>
+                </div>
+
+                {/* Bottom Row - Filters, Sort, and Actions */}
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                  {/* Filters and Sort */}
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Select value={filterBy} onValueChange={setFilterBy}>
+                      <SelectTrigger className="w-full sm:w-40">
+                        <SelectValue placeholder="Filter by" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Items</SelectItem>
+                        <SelectItem value="in-stock">In Stock</SelectItem>
+                        <SelectItem value="out-of-stock">Out of Stock</SelectItem>
+                        <SelectItem value="oily">Oily Skin</SelectItem>
+                        <SelectItem value="dry">Dry Skin</SelectItem>
+                        <SelectItem value="combination">Combination Skin</SelectItem>
+                        <SelectItem value="sensitive">Sensitive Skin</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                      <SelectTrigger className="w-full sm:w-40">
+                        <SelectValue placeholder="Sort by" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="newest">Newest First</SelectItem>
+                        <SelectItem value="name">Name (A-Z)</SelectItem>
+                        <SelectItem value="price-low">Price (Low to High)</SelectItem>
+                        <SelectItem value="price-high">Price (High to Low)</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {/* View Mode Toggle - Desktop */}
+                    <div className="hidden sm:flex border rounded-lg p-1">
+                      <button
+                        onClick={() => setViewMode('grid')}
+                        className={`p-2 rounded ${viewMode === 'grid' ? 'bg-green-100 text-green-600' : 'text-gray-400'}`}
+                      >
+                        <Grid className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => setViewMode('list')}
+                        className={`p-2 rounded ${viewMode === 'list' ? 'bg-green-100 text-green-600' : 'text-gray-400'}`}
+                      >
+                        <List className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
 
                   {/* Action Buttons */}
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={shareWishlist}
+                      className="w-full sm:w-auto"
                     >
-                      <Share2 className="h-4 w-4 mr-1" />
+                      <Share2 className="h-4 w-4 mr-2" />
                       Share
                     </Button>
                     
@@ -493,9 +516,11 @@ function WishList() {
                       size="sm"
                       onClick={addAllToCart}
                       disabled={filteredItems.filter(item => item.Stock > 0).length === 0}
+                      className="w-full sm:w-auto"
                     >
-                      <ShoppingCart className="h-4 w-4 mr-1" />
-                      Add All to Cart
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      <span className="hidden sm:inline">Add All to Cart</span>
+                      <span className="sm:hidden">Add All</span>
                     </Button>
                   </div>
                 </div>
@@ -561,7 +586,7 @@ interface WishlistCardProps {
 
 function WishlistCard({ item, isSelected, onSelect, onAddToCart, onRemove }: WishlistCardProps) {
   return (
-    <div className={`bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden ${isSelected ? 'ring-2 ring-green-500' : ''}`}>
+    <div className={`relative bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden ${isSelected ? 'ring-2 ring-green-500' : ''}`}>
       {/* Selection Checkbox */}
       <div className="absolute top-2 left-2 z-10">
         <input
@@ -585,42 +610,42 @@ function WishlistCard({ item, isSelected, onSelect, onAddToCart, onRemove }: Wis
           <img
             src={`../../src/assets/${item.Image}`}
             alt={item.Name}
-            className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
+            className="w-full h-48 sm:h-56 object-cover hover:scale-105 transition-transform duration-300"
           />
           {item.Stock === 0 && (
             <div className="absolute inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
-              <span className="text-white font-medium">Out of Stock</span>
+              <span className="text-white font-medium text-sm">Out of Stock</span>
             </div>
           )}
         </div>
       </Link>
 
       {/* Product Info */}
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
         <Link to={`/products/${item.ProductID}`}>
-          <h3 className="font-semibold text-gray-900 hover:text-green-600 transition-colors line-clamp-2 mb-2">
+          <h3 className="font-semibold text-gray-900 hover:text-green-600 transition-colors line-clamp-2 mb-2 text-sm sm:text-base">
             {item.Name}
           </h3>
         </Link>
 
-        <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+        <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mb-3">
           {item.Description}
         </p>
 
         {/* Product Details */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-1">
           <div className="flex items-center gap-1 text-xs text-gray-500">
-            <Package className="h-3 w-3" />
-            <span>{item.ForSkinType}</span>
+            <Package className="h-3 w-3 flex-shrink-0" />
+            <span className="truncate">{item.ForSkinType}</span>
           </div>
           <div className="flex items-center gap-1 text-xs text-gray-500">
-            <span className={`w-2 h-2 rounded-full ${item.Stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></span>
+            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${item.Stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></span>
             <span>{item.Stock > 0 ? 'In Stock' : 'Out of Stock'}</span>
           </div>
         </div>
 
         {/* Price */}
-        <div className="text-lg font-bold text-green-600 mb-4">
+        <div className="text-base sm:text-lg font-bold text-green-600 mb-3 sm:mb-4">
           {item.Price.toLocaleString()} MMK
         </div>
 
@@ -629,17 +654,18 @@ function WishlistCard({ item, isSelected, onSelect, onAddToCart, onRemove }: Wis
           <Button
             onClick={onAddToCart}
             disabled={item.Stock === 0}
-            className="flex-1"
+            className="flex-1 text-xs sm:text-sm"
             size="sm"
           >
-            <ShoppingCart className="h-4 w-4 mr-1" />
-            Add to Cart
+            <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+            <span className="hidden sm:inline">Add to Cart</span>
+            <span className="sm:hidden">Add</span>
           </Button>
           
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Trash2 className="h-4 w-4" />
+              <Button variant="outline" size="sm" className="px-2 sm:px-3">
+                <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -664,59 +690,58 @@ function WishlistCard({ item, isSelected, onSelect, onAddToCart, onRemove }: Wis
 // List View Card Component
 function WishlistListCard({ item, isSelected, onSelect, onAddToCart, onRemove }: WishlistCardProps) {
   return (
-    <div className={`bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 ${isSelected ? 'ring-2 ring-green-500' : ''}`}>
-      <div className="flex flex-col sm:flex-row gap-4">
-        {/* Selection and Image */}
-        <div className="flex gap-4">
-          <div className="flex items-start pt-2">
-            <input
-              type="checkbox"
-              checked={isSelected}
-              onChange={onSelect}
-              className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+    <div className={`bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 sm:p-4 ${isSelected ? 'ring-2 ring-green-500' : ''}`}>
+      <div className="flex gap-3 sm:gap-4">
+        {/* Selection Checkbox */}
+        <div className="flex items-start pt-1">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={onSelect}
+            className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+          />
+        </div>
+        
+        {/* Product Image */}
+        <Link to={`/products/${item.ProductID}`} className="flex-shrink-0">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-gray-100 rounded-lg overflow-hidden">
+            <img
+              src={`../../src/assets/${item.Image}`}
+              alt={item.Name}
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
             />
           </div>
-          
-          <Link to={`/products/${item.ProductID}`} className="flex-shrink-0">
-            <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gray-100 rounded-lg overflow-hidden">
-              <img
-                src={`../../src/assets/${item.Image}`}
-                alt={item.Name}
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-          </Link>
-        </div>
+        </Link>
 
         {/* Product Info */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-col h-full">
             <div className="flex-1">
               <Link to={`/products/${item.ProductID}`}>
-                <h3 className="text-lg font-semibold text-gray-900 hover:text-green-600 transition-colors line-clamp-2 mb-2">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 hover:text-green-600 transition-colors line-clamp-2 mb-2">
                   {item.Name}
                 </h3>
               </Link>
 
-              <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+              <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mb-3">
                 {item.Description}
               </p>
 
-              <div className="flex flex-wrap items-center gap-4 mb-4">
-                <div className="flex items-center gap-1 text-sm text-gray-500">
-                  <Package className="h-4 w-4" />
+              <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-4 mb-3 sm:mb-4">
+                <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-500">
+                  <Package className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                   <span>For {item.ForSkinType} skin</span>
                 </div>
                 
-                <div className="flex items-center gap-1 text-sm text-gray-500">
-                  <span className={`w-2 h-2 rounded-full ${item.Stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-500">
+                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${item.Stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></span>
                   <span>{item.Stock > 0 ? 'In Stock' : 'Out of Stock'}</span>
                 </div>
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600">
                 {item.Price.toLocaleString()} MMK
               </div>
 
@@ -725,15 +750,17 @@ function WishlistListCard({ item, isSelected, onSelect, onAddToCart, onRemove }:
                   onClick={onAddToCart}
                   disabled={item.Stock === 0}
                   size="sm"
+                  className="flex-1 sm:flex-none text-xs sm:text-sm"
                 >
-                  <ShoppingCart className="h-4 w-4 mr-1" />
-                  Add to Cart
+                  <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  <span className="hidden sm:inline">Add to Cart</span>
+                  <span className="sm:hidden">Add</span>
                 </Button>
                 
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <Trash2 className="h-4 w-4" />
+                    <Button variant="outline" size="sm" className="px-2 sm:px-3">
+                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
