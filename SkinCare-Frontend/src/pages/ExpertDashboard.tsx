@@ -44,6 +44,8 @@ const ExpertDashboard = () => {
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [profileForm, setProfileForm] = useState({
     name: '',
     email: '',
@@ -55,6 +57,28 @@ const ExpertDashboard = () => {
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isLoggingOutRef = useRef(false);
+
+  // Mobile detection
+  useEffect(() => {
+    const checkIsMobile = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (mobile) {
+        setIsMobileSidebarOpen(false);
+      }
+    };
+
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+
+  // Close mobile sidebar when conversation changes
+  useEffect(() => {
+    if (isMobile && activeConversation) {
+      setIsMobileSidebarOpen(false);
+    }
+  }, [activeConversation, isMobile]);
 
   useEffect(() => {
     // Check if expert is already logged in
@@ -505,15 +529,15 @@ const ExpertDashboard = () => {
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
-          <div className="text-center mb-8">
-            <MessageCircle className="mx-auto h-12 w-12 text-blue-600 mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900">Expert Login</h2>
-            <p className="text-gray-600">Sign in to your expert dashboard</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6 sm:p-8">
+          <div className="text-center mb-6 sm:mb-8">
+            <MessageCircle className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-blue-600 mb-4" />
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Expert Login</h2>
+            <p className="text-gray-600 text-sm sm:text-base">Sign in to your expert dashboard</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
               <input
@@ -521,7 +545,7 @@ const ExpertDashboard = () => {
                 required
                 value={loginForm.email}
                 onChange={(e) => setLoginForm((prev) => ({ ...prev, email: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                 placeholder="expert@skincare.com"
               />
             </div>
@@ -533,7 +557,7 @@ const ExpertDashboard = () => {
                 required
                 value={loginForm.password}
                 onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                 placeholder="Enter your password"
               />
             </div>
@@ -541,13 +565,13 @@ const ExpertDashboard = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-gray-600">
+          <div className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-600">
             <p>Demo credentials:</p>
             <p>Email: sarah@skincare.com</p>
             <p>Password: hello</p>
@@ -559,9 +583,21 @@ const ExpertDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Mobile Overlay */}
+      {isMobile && isMobileSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsMobileSidebarOpen(false)}
+        />
+      )}
+
       <div className="flex h-screen">
         {/* Sidebar */}
-        <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+        <div className={`
+          ${isMobile ? 'fixed top-0 left-0 h-full z-50' : 'relative'} 
+          ${isMobile && !isMobileSidebarOpen ? '-translate-x-full' : 'translate-x-0'}
+          w-80 bg-white border-r border-gray-200 flex flex-col transition-transform duration-300
+        `}>
           {/* Header */}
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
