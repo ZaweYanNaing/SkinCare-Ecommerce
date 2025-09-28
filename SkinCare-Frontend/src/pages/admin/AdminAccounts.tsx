@@ -167,12 +167,12 @@ function AdminAccounts() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-6">
-      <div className="mb-8 flex items-center justify-between">
+    <div className="w-full max-w-7xl mx-auto p-4 sm:p-6">
+      <div className="mb-6 sm:mb-8">
         <div className="flex items-center">
-          <Separator orientation="vertical" className="mr-4 h-6" />
+          <Separator orientation="vertical" className="mr-4 h-6 hidden sm:block" />
           <Breadcrumb>
-            <BreadcrumbList className="text-[1rem]">
+            <BreadcrumbList className="text-sm sm:text-base">
               <BreadcrumbItem className="hidden md:block">
                 <BreadcrumbLink href="/admin">Dashboard</BreadcrumbLink>
               </BreadcrumbItem>
@@ -190,43 +190,43 @@ function AdminAccounts() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Admins</p>
-                <p className="text-2xl font-bold">{admins.length}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Total Admins</p>
+                <p className="text-xl sm:text-2xl font-bold">{admins.length}</p>
               </div>
-              <Shield className="h-8 w-8 text-blue-500" />
+              <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Super Admins</p>
-                <p className="text-2xl font-bold text-red-600">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Super Admins</p>
+                <p className="text-xl sm:text-2xl font-bold text-red-600">
                   {admins.filter(a => a.Type.toLowerCase().includes('super')).length}
                 </p>
               </div>
-              <Shield className="h-8 w-8 text-red-500" />
+              <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-red-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Regular Admins</p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Regular Admins</p>
+                <p className="text-xl sm:text-2xl font-bold text-green-600">
                   {admins.filter(a => !a.Type.toLowerCase().includes('super')).length}
                 </p>
               </div>
-              <Shield className="h-8 w-8 text-green-500" />
+              <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
@@ -234,7 +234,7 @@ function AdminAccounts() {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4">
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
@@ -242,14 +242,14 @@ function AdminAccounts() {
               </CardTitle>
               <CardDescription>Manage administrator accounts and permissions</CardDescription>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
                   placeholder="Search admins..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-64"
+                  className="pl-10 w-full"
                 />
               </div>
               <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -322,78 +322,148 @@ function AdminAccounts() {
               <div>Loading admin accounts...</div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-3">Admin Info</th>
-                    <th className="text-left p-3">Type</th>
-                    <th className="text-left p-3">Email</th>
-                    <th className="text-left p-3">Created Date</th>
-                    <th className="text-left p-3">Last Login</th>
-                    <th className="text-left p-3">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredAdmins.map((admin) => (
-                    <tr key={admin.AdminID} className="border-b hover:bg-gray-50">
-                      <td className="p-3">
-                        <div>
-                          <div className="font-medium">Admin #{admin.AdminID}</div>
-                          <div className="text-sm text-gray-500">ID: {admin.AdminID}</div>
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        <Badge variant={
-                          admin.Type.toLowerCase().includes('super') ? 'destructive' : 
-                          admin.Type === 'Expert' ? 'secondary' : 'default'
-                        }>
-                          {admin.Type}
-                        </Badge>
-                        {admin.Type === 'Expert' && admin.RoleDescription && (
-                          <div className="text-xs text-gray-500 mt-1 truncate max-w-32">
-                            {admin.RoleDescription}
-                          </div>
-                        )}
-                      </td>
-                      <td className="p-3">{admin.Email}</td>
-                      <td className="p-3 text-sm text-gray-500">
-                        {formatDate(admin.CreatedDate)}
-                      </td>
-                      <td className="p-3 text-sm text-gray-500">
-                        {formatDate(admin.LastLogin)}
-                      </td>
-                      <td className="p-3">
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleEditAdmin(admin)}
-                          >
-                            <Edit className="h-4 w-4 mr-1" />
-                            Edit
-                          </Button>
-                          <Button 
-                            variant="destructive" 
-                            size="sm"
-                            onClick={() => handleDeleteAdmin(admin.AdminID, admin.Email)}
-                          >
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            Delete
-                          </Button>
-                        </div>
-                      </td>
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-3">Admin Info</th>
+                      <th className="text-left p-3">Type</th>
+                      <th className="text-left p-3">Email</th>
+                      <th className="text-left p-3">Created Date</th>
+                      <th className="text-left p-3">Last Login</th>
+                      <th className="text-left p-3">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filteredAdmins.map((admin) => (
+                      <tr key={admin.AdminID} className="border-b hover:bg-gray-50">
+                        <td className="p-3">
+                          <div>
+                            <div className="font-medium">Admin #{admin.AdminID}</div>
+                            <div className="text-sm text-gray-500">ID: {admin.AdminID}</div>
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <Badge variant={
+                            admin.Type.toLowerCase().includes('super') ? 'destructive' : 
+                            admin.Type === 'Expert' ? 'secondary' : 'default'
+                          }>
+                            {admin.Type}
+                          </Badge>
+                          {admin.Type === 'Expert' && admin.RoleDescription && (
+                            <div className="text-xs text-gray-500 mt-1 truncate max-w-32">
+                              {admin.RoleDescription}
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-3">{admin.Email}</td>
+                        <td className="p-3 text-sm text-gray-500">
+                          {formatDate(admin.CreatedDate)}
+                        </td>
+                        <td className="p-3 text-sm text-gray-500">
+                          {formatDate(admin.LastLogin)}
+                        </td>
+                        <td className="p-3">
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleEditAdmin(admin)}
+                            >
+                              <Edit className="h-4 w-4 mr-1" />
+                              Edit
+                            </Button>
+                            <Button 
+                              variant="destructive" 
+                              size="sm"
+                              onClick={() => handleDeleteAdmin(admin.AdminID, admin.Email)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Delete
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="lg:hidden space-y-4">
+                {filteredAdmins.map((admin) => (
+                  <div key={admin.AdminID} className="border rounded-lg p-4 bg-white hover:bg-gray-50 transition-colors">
+                    {/* Header with admin info and type */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="font-medium text-base">Admin #{admin.AdminID}</h3>
+                        <p className="text-sm text-gray-500">ID: {admin.AdminID}</p>
+                      </div>
+                      <Badge variant={
+                        admin.Type.toLowerCase().includes('super') ? 'destructive' : 
+                        admin.Type === 'Expert' ? 'secondary' : 'default'
+                      }>
+                        {admin.Type}
+                      </Badge>
+                    </div>
+
+                    {/* Admin details */}
+                    <div className="space-y-3 mb-4 text-sm">
+                      <div>
+                        <p className="text-gray-500">Email</p>
+                        <p className="font-medium break-all">{admin.Email}</p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-gray-500">Created</p>
+                          <p className="font-medium">{formatDate(admin.CreatedDate)}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Last Login</p>
+                          <p className="font-medium">{formatDate(admin.LastLogin)}</p>
+                        </div>
+                      </div>
+                      {admin.Type === 'Expert' && admin.RoleDescription && (
+                        <div>
+                          <p className="text-gray-500">Role Description</p>
+                          <p className="font-medium">{admin.RoleDescription}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-2 pt-3 border-t">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleEditAdmin(admin)}
+                        className="flex-1"
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={() => handleDeleteAdmin(admin.AdminID, admin.Email)}
+                        className="flex-1"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
               
               {filteredAdmins.length === 0 && (
                 <div className="text-center py-8 text-gray-500">
                   {searchTerm ? 'No admin accounts found matching your search.' : 'No admin accounts available.'}
                 </div>
               )}
-            </div>
+            </>
           )}
         </CardContent>
       </Card>

@@ -178,12 +178,12 @@ function ExpertAccounts() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-6">
-      <div className="mb-8 flex items-center justify-between">
+    <div className="w-full max-w-7xl mx-auto p-4 sm:p-6">
+      <div className="mb-6 sm:mb-8">
         <div className="flex items-center">
-          <Separator orientation="vertical" className="mr-4 h-6" />
+          <Separator orientation="vertical" className="mr-4 h-6 hidden sm:block" />
           <Breadcrumb>
-            <BreadcrumbList className="text-[1rem]">
+            <BreadcrumbList className="text-sm sm:text-base">
               <BreadcrumbItem className="hidden md:block">
                 <BreadcrumbLink href="/admin">Dashboard</BreadcrumbLink>
               </BreadcrumbItem>
@@ -200,57 +200,57 @@ function ExpertAccounts() {
         </div>
       </div> 
      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Experts</p>
-                <p className="text-2xl font-bold">{experts.length}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Total Experts</p>
+                <p className="text-xl sm:text-2xl font-bold">{experts.length}</p>
               </div>
-              <User className="h-8 w-8 text-blue-500" />
+              <User className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Active Experts</p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Active Experts</p>
+                <p className="text-xl sm:text-2xl font-bold text-green-600">
                   {experts.filter(e => e.Status === 'active').length}
                 </p>
               </div>
-              <User className="h-8 w-8 text-green-500" />
+              <User className="h-6 w-6 sm:h-8 sm:w-8 text-green-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Busy Experts</p>
-                <p className="text-2xl font-bold text-yellow-600">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Busy Experts</p>
+                <p className="text-xl sm:text-2xl font-bold text-yellow-600">
                   {experts.filter(e => e.Status === 'busy').length}
                 </p>
               </div>
-              <User className="h-8 w-8 text-yellow-500" />
+              <User className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Offline Experts</p>
-                <p className="text-2xl font-bold text-gray-600">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Offline Experts</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-600">
                   {experts.filter(e => e.Status === 'offline').length}
                 </p>
               </div>
-              <User className="h-8 w-8 text-gray-500" />
+              <User className="h-6 w-6 sm:h-8 sm:w-8 text-gray-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
@@ -258,7 +258,7 @@ function ExpertAccounts() {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4">
             <div>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
@@ -266,14 +266,14 @@ function ExpertAccounts() {
               </CardTitle>
               <CardDescription>Manage expert accounts and their information</CardDescription>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
                   placeholder="Search experts..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-64"
+                  className="pl-10 w-full"
                 />
               </div>
               <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -360,74 +360,139 @@ CardContent>
               <div>Loading expert accounts...</div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-3">Expert Info</th>
-                    <th className="text-left p-3">Email</th>
-                    <th className="text-left p-3">Specialization</th>
-                    <th className="text-left p-3">Status</th>
-                    <th className="text-left p-3">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredExperts.map((expert) => (
-                    <tr key={expert.ExpertID} className="border-b hover:bg-gray-50">
-                      <td className="p-3">
-                        <div>
-                          <div className="font-medium">{expert.Name}</div>
-                          <div className="text-sm text-gray-500">ID: {expert.ExpertID}</div>
-                          {expert.Bio && (
-                            <div className="text-xs text-gray-400 mt-1 max-w-48 truncate">
-                              {expert.Bio}
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                      <td className="p-3">{expert.Email}</td>
-                      <td className="p-3">
-                        <Badge variant="outline">{expert.Specialization}</Badge>
-                      </td>
-                      <td className="p-3">
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-3">Expert Info</th>
+                      <th className="text-left p-3">Email</th>
+                      <th className="text-left p-3">Specialization</th>
+                      <th className="text-left p-3">Status</th>
+                      <th className="text-left p-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredExperts.map((expert) => (
+                      <tr key={expert.ExpertID} className="border-b hover:bg-gray-50">
+                        <td className="p-3">
+                          <div>
+                            <div className="font-medium">{expert.Name}</div>
+                            <div className="text-sm text-gray-500">ID: {expert.ExpertID}</div>
+                            {expert.Bio && (
+                              <div className="text-xs text-gray-400 mt-1 max-w-48 truncate">
+                                {expert.Bio}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-3">{expert.Email}</td>
+                        <td className="p-3">
+                          <Badge variant="outline">{expert.Specialization}</Badge>
+                        </td>
+                        <td className="p-3">
+                          <Badge variant={
+                            expert.Status === 'active' ? 'default' : 
+                            expert.Status === 'busy' ? 'secondary' : 'destructive'
+                          }>
+                            {expert.Status}
+                          </Badge>
+                        </td>
+                        <td className="p-3">
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleEditExpert(expert)}
+                            >
+                              <Edit className="h-4 w-4 mr-1" />
+                              Edit
+                            </Button>
+                            <Button 
+                              variant="destructive" 
+                              size="sm"
+                              onClick={() => handleDeleteExpert(expert.ExpertID, expert.Name)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Delete
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="lg:hidden space-y-4">
+                {filteredExperts.map((expert) => (
+                  <div key={expert.ExpertID} className="border rounded-lg p-4 bg-white hover:bg-gray-50 transition-colors">
+                    {/* Header with expert info and status */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="font-medium text-base">{expert.Name}</h3>
+                        <p className="text-sm text-gray-500">ID: {expert.ExpertID}</p>
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        <Badge variant="outline" className="text-xs">
+                          {expert.Specialization}
+                        </Badge>
                         <Badge variant={
                           expert.Status === 'active' ? 'default' : 
                           expert.Status === 'busy' ? 'secondary' : 'destructive'
-                        }>
+                        } className="text-xs">
                           {expert.Status}
                         </Badge>
-                      </td>
-                      <td className="p-3">
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleEditExpert(expert)}
-                          >
-                            <Edit className="h-4 w-4 mr-1" />
-                            Edit
-                          </Button>
-                          <Button 
-                            variant="destructive" 
-                            size="sm"
-                            onClick={() => handleDeleteExpert(expert.ExpertID, expert.Name)}
-                          >
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            Delete
-                          </Button>
+                      </div>
+                    </div>
+
+                    {/* Expert details */}
+                    <div className="space-y-3 mb-4 text-sm">
+                      <div>
+                        <p className="text-gray-500">Email</p>
+                        <p className="font-medium break-all">{expert.Email}</p>
+                      </div>
+                      {expert.Bio && (
+                        <div>
+                          <p className="text-gray-500">Bio</p>
+                          <p className="font-medium text-sm leading-relaxed">{expert.Bio}</p>
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-2 pt-3 border-t">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleEditExpert(expert)}
+                        className="flex-1"
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={() => handleDeleteExpert(expert.ExpertID, expert.Name)}
+                        className="flex-1"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
               
               {filteredExperts.length === 0 && (
                 <div className="text-center py-8 text-gray-500">
                   {searchTerm ? 'No expert accounts found matching your search.' : 'No expert accounts available.'}
                 </div>
               )}
-            </div>
+            </>
           )}
         </CardContent>
       </Card>
