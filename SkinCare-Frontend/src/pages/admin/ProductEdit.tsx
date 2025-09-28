@@ -178,12 +178,12 @@ function ProductEdit() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-6">
-      <div className="mb-8 flex items-center justify-between">
+    <div className="w-full max-w-7xl mx-auto p-4 sm:p-6">
+      <div className="mb-6 sm:mb-8">
         <div className="flex items-center">
-          <Separator orientation="vertical" className="mr-4 h-6" />
+          <Separator orientation="vertical" className="mr-4 h-6 hidden sm:block" />
           <Breadcrumb>
-            <BreadcrumbList className="text-[1rem]">
+            <BreadcrumbList className="text-sm sm:text-base">
               <BreadcrumbItem className="hidden md:block">
                 <BreadcrumbLink href="#">Product</BreadcrumbLink>
               </BreadcrumbItem>
@@ -198,18 +198,23 @@ function ProductEdit() {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4">
             <div>
               <CardTitle>Product Management</CardTitle>
               <CardDescription>Manage your skincare product inventory</CardDescription>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input placeholder="Search products..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 w-64" />
+                <Input 
+                  placeholder="Search products..." 
+                  value={searchTerm} 
+                  onChange={(e) => setSearchTerm(e.target.value)} 
+                  className="pl-10 w-full" 
+                />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-full sm:w-48">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -228,7 +233,9 @@ function ProductEdit() {
               <div>Loading products...</div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden lg:block overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
@@ -292,13 +299,92 @@ function ProductEdit() {
                   ))}
                 </tbody>
               </table>
-
-              {filteredProducts.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  {searchTerm ? 'No products found matching your search.' : 'No products available.'}
-                </div>
-              )}
             </div>
+
+            {/* Mobile Card View */}
+            <div className="lg:hidden space-y-4">
+              {filteredProducts.map((product) => (
+                <div key={product.ProductID} className="border rounded-lg p-4 bg-white hover:bg-gray-50 transition-colors">
+                  {/* Header with image and basic info */}
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0">
+                      {product.Image ? (
+                        <img
+                          src={`../../src/assets/${product.Image}`}
+                          alt={product.Name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const nextDiv = target.nextElementSibling as HTMLElement;
+                            if (nextDiv) nextDiv.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <div className={`text-xs text-gray-400 text-center p-2 ${product.Image ? 'hidden' : ''}`}>No Image</div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-base mb-1">{product.Name}</h3>
+                      <p className="text-sm text-gray-500 line-clamp-2 mb-2">{product.Description}</p>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={product.Status === 'Active' ? 'default' : product.Status === 'Low Stock' ? 'secondary' : 'destructive'} className="text-xs">
+                          {product.Status}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Product details */}
+                  <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                    <div>
+                      <p className="text-gray-500">Price</p>
+                      <p className="font-medium text-green-600">{formatPrice(product.Price)}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Stock</p>
+                      <p className="font-medium">{product.Stock} units</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Category</p>
+                      <p className="font-medium">{product.CategoryName}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Skin Type</p>
+                      <p className="font-medium">{product.ForSkinType}</p>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-2 pt-3 border-t">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => handleEdit(product)}
+                      className="flex-1"
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      size="sm" 
+                      onClick={() => handleDelete(product.ProductID, product.Name)}
+                      className="flex-1"
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {filteredProducts.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                {searchTerm ? 'No products found matching your search.' : 'No products available.'}
+              </div>
+            )}
+            </>
           )}
         </CardContent>
       </Card>

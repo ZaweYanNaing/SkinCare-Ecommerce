@@ -133,12 +133,12 @@ function AccManagement() {
   ];
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-6">
-      <div className="mb-8 flex items-center justify-between">
+    <div className="w-full max-w-7xl mx-auto p-4 sm:p-6">
+      <div className="mb-6 sm:mb-8">
         <div className="flex items-center">
-          <Separator orientation="vertical" className="mr-4 h-6" />
+          <Separator orientation="vertical" className="mr-4 h-6 hidden sm:block" />
           <Breadcrumb>
-            <BreadcrumbList className="text-[1rem]">
+            <BreadcrumbList className="text-sm sm:text-base">
               <BreadcrumbItem className="hidden md:block">
                 <BreadcrumbLink href="/admin">Dashboard</BreadcrumbLink>
               </BreadcrumbItem>
@@ -152,9 +152,9 @@ function AccManagement() {
       </div>
 
       <div className="space-y-6">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <h1 className="text-3xl font-bold text-gray-900">Account Management</h1>
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Account Management</h1>
             <Badge className={getRoleBadgeColor(currentAdminRole)}>
               {currentAdminRole}
             </Badge>
@@ -162,7 +162,7 @@ function AccManagement() {
           <p className="text-gray-600">Choose the type of accounts you want to manage</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {accountTypes.map((accountType) => {
             const IconComponent = accountType.icon;
             const hasAnyPermission = accountType.features.some(feature => 
@@ -249,33 +249,33 @@ function AccManagement() {
         </div>
 
         {/* Quick Stats */}
-        <div className="mt-12">
+        <div className="mt-8 sm:mt-12">
           <Card>
             <CardHeader>
               <CardTitle>Quick Overview</CardTitle>
               <CardDescription>System account statistics at a glance</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">-</div>
-                  <div className="text-sm text-gray-600">Total Customers</div>
+                  <div className="text-xl sm:text-2xl font-bold text-blue-600">-</div>
+                  <div className="text-xs sm:text-sm text-gray-600">Total Customers</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">-</div>
-                  <div className="text-sm text-gray-600">Active Customers</div>
+                  <div className="text-xl sm:text-2xl font-bold text-green-600">-</div>
+                  <div className="text-xs sm:text-sm text-gray-600">Active Customers</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-red-600">-</div>
-                  <div className="text-sm text-gray-600">Total Admins</div>
+                  <div className="text-xl sm:text-2xl font-bold text-red-600">-</div>
+                  <div className="text-xs sm:text-sm text-gray-600">Total Admins</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600">-</div>
-                  <div className="text-sm text-gray-600">System Users</div>
+                  <div className="text-xl sm:text-2xl font-bold text-purple-600">-</div>
+                  <div className="text-xs sm:text-sm text-gray-600">System Users</div>
                 </div>
               </div>
               <div className="text-center mt-4">
-                <p className="text-sm text-gray-500">
+                <p className="text-xs sm:text-sm text-gray-500">
                   Click on the cards above to view detailed account management
                 </p>
               </div>
