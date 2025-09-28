@@ -6,7 +6,6 @@ import { Separator } from '@/components/ui/separator';
 import { Activity, CreditCard, DollarSign, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-
 interface OverviewStats {
   totalSales: string;
   totalOrders: number;
@@ -22,7 +21,6 @@ function Overview() {
     activeCustomers: 0
   });
   const [loading, setLoading] = useState(true);
-
 
   useEffect(() => {
     fetchOverviewStats();
@@ -46,12 +44,12 @@ function Overview() {
   const reportCards = [
     {
       title: 'Total Sales',
-      value: loading ? 'Loading...' : `$${stats.totalSales}`,
+      value: loading ? 'Loading...' : '$' + stats.totalSales,
       icon: DollarSign,
     },
     {
       title: 'Total Orders',
-      value: loading ? 'Loading...' : stats.totalOrders.toString(),
+      value: loading ? 'Loading...' : String(stats.totalOrders),
       icon: Users,
     },
     {
@@ -61,55 +59,67 @@ function Overview() {
     },
     {
       title: 'Active Customers',
-      value: loading ? 'Loading...' : stats.activeCustomers.toString(),
+      value: loading ? 'Loading...' : String(stats.activeCustomers),
       icon: Activity,
     },
   ];
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-6">
-      <div className="mb-8 flex items-center justify-between">
-        <div className="flex items-center">
-          <Separator orientation="vertical" className="mr-4 h-6" />
-          <Breadcrumb>
-            <BreadcrumbList className="text-[1rem]">
-              <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Overview</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-        <div className="flex items-center gap-3">
-          <EnhancedExportDialog disabled={loading} />
+    <div className="w-full max-w-7xl mx-auto p-4 sm:p-6">
+      {/* Header */}
+      <div className="mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center">
+            <Separator orientation="vertical" className="mr-4 h-6 hidden sm:block" />
+            <Breadcrumb>
+              <BreadcrumbList className="text-sm sm:text-base">
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Overview</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+          <div className="flex items-center gap-3">
+            <EnhancedExportDialog disabled={loading} />
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
         {reportCards.map((card, index) => {
           const IconComponent = card.icon;
           return (
-            <div key={index} className="rounded-2xl border border-zinc-200 p-6 shadow-sm bg-white">
+            <div 
+              key={index} 
+              className="rounded-xl sm:rounded-2xl border border-zinc-200 p-4 sm:p-6 shadow-sm bg-white hover:shadow-md transition-shadow admin-card"
+            >
               <div className="flex items-center justify-between pb-2">
-                <p className="text-sm font-medium text-zinc-600">{card.title}</p>
-                <IconComponent className="h-4 w-4 text-zinc-500" />
+                <p className="text-xs sm:text-sm font-medium text-zinc-600 admin-text-truncate">
+                  {card.title}
+                </p>
+                <IconComponent className="h-4 w-4 sm:h-5 sm:w-5 text-zinc-500 flex-shrink-0" />
               </div>
               <div className="flex">
-                <p className="text-2xl font-bold text-zinc-950">{card.value}</p>
+                <p className="text-lg sm:text-2xl font-bold text-zinc-950 admin-text-truncate">
+                  {card.value}
+                </p>
               </div>
             </div>
           );
         })}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-8">
-        <div className="lg:col-span-4 ">
+      {/* Charts */}
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-8">
+        <div className="lg:col-span-5">
           <OverviewChart />
         </div>
-        <div className="lg:col-span-4">
+        <div className="lg:col-span-3">
           <RecentSales />
         </div>
       </div>

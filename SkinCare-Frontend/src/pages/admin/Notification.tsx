@@ -157,91 +157,97 @@ function Notification() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-6">
-      <div className="mb-8 flex items-center justify-between">
-        <div className="flex items-center">
-          <Separator orientation="vertical" className="mr-4 h-6" />
-          <Breadcrumb>
-            <BreadcrumbList className="text-[1rem]">
-              <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Notifications</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <Button 
-            variant="outline" 
-            onClick={checkForNewNotifications}
-            disabled={refreshing}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            {refreshing ? 'Checking...' : 'Check for New Notifications'}
-          </Button>
+    <div className="w-full max-w-7xl mx-auto p-4 sm:p-6">
+      {/* Header */}
+      <div className="mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center">
+            <Separator orientation="vertical" className="mr-4 h-6 hidden sm:block" />
+            <Breadcrumb>
+              <BreadcrumbList className="text-sm sm:text-base">
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Notifications</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
           
-          {stats.unread > 0 && (
-            <Button onClick={markAllAsRead}>
-              Mark All Read
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <Button 
+              variant="outline" 
+              onClick={checkForNewNotifications}
+              disabled={refreshing}
+              className="w-full sm:w-auto"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">{refreshing ? 'Checking...' : 'Check for New Notifications'}</span>
+              <span className="sm:hidden">{refreshing ? 'Checking...' : 'Check New'}</span>
             </Button>
-          )}
+            
+            {stats.unread > 0 && (
+              <Button onClick={markAllAsRead} className="w-full sm:w-auto">
+                <span className="hidden sm:inline">Mark All Read</span>
+                <span className="sm:hidden">Mark All</span>
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total</p>
-                <p className="text-2xl font-bold">{stats.total}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Total</p>
+                <p className="text-xl sm:text-2xl font-bold">{stats.total}</p>
               </div>
-              <Bell className="h-8 w-8 text-blue-500" />
+              <Bell className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Unread</p>
-                <p className="text-2xl font-bold text-orange-600">{stats.unread}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Unread</p>
+                <p className="text-xl sm:text-2xl font-bold text-orange-600">{stats.unread}</p>
               </div>
-              <Mail className="h-8 w-8 text-orange-500" />
+              <Mail className="h-6 w-6 sm:h-8 sm:w-8 text-orange-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Orders</p>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Orders</p>
+                <p className="text-xl sm:text-2xl font-bold text-blue-600">
                   {stats.by_type.find(t => t.type === 'order')?.count || 0}
                 </p>
               </div>
-              <ShoppingCart className="h-8 w-8 text-blue-500" />
+              <ShoppingCart className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Alerts</p>
-                <p className="text-2xl font-bold text-red-600">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Alerts</p>
+                <p className="text-xl sm:text-2xl font-bold text-red-600">
                   {stats.by_type.find(t => t.type === 'alert')?.count || 0}
                 </p>
               </div>
-              <AlertCircle className="h-8 w-8 text-red-500" />
+              <AlertCircle className="h-6 w-6 sm:h-8 sm:w-8 text-red-500 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
@@ -272,33 +278,36 @@ function Notification() {
                     notification.isRead === 0 ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'
                   }`}
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3 flex-1">
-                      {getNotificationIcon(notification.Type)}
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-medium">{notification.Title}</h4>
-                          <Badge className={`text-xs ${getTypeColor(notification.Type)}`}>
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <div className="flex-shrink-0">
+                        {getNotificationIcon(notification.Type)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <h4 className="font-medium text-sm sm:text-base truncate">{notification.Title}</h4>
+                          <Badge className={`text-xs ${getTypeColor(notification.Type)} flex-shrink-0`}>
                             {notification.Type}
                           </Badge>
                           {notification.isRead === 0 && (
-                            <Badge variant="default" className="text-xs">New</Badge>
+                            <Badge variant="default" className="text-xs flex-shrink-0">New</Badge>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600 mb-2">{notification.Message}</p>
-                        <div className="flex items-center gap-4 text-xs text-gray-400">
+                        <p className="text-sm text-gray-600 mb-2 break-words">{notification.Message}</p>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs text-gray-400">
                           <span>{formatTimeAgo(notification.DateSent)}</span>
-                          <span>{new Date(notification.DateSent).toLocaleString()}</span>
+                          <span className="hidden sm:inline">{new Date(notification.DateSent).toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-2 ml-4">
+                    <div className="flex items-center gap-2 flex-shrink-0 sm:ml-4">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => toggleReadStatus(notification.NotiID, notification.isRead)}
                         title={notification.isRead === 0 ? 'Mark as read' : 'Mark as unread'}
+                        className="p-2"
                       >
                         {notification.isRead === 0 ? (
                           <Eye className="h-4 w-4" />
@@ -310,7 +319,7 @@ function Notification() {
                         variant="ghost"
                         size="sm"
                         onClick={() => deleteNotification(notification.NotiID)}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-red-600 hover:text-red-700 p-2"
                         title="Delete notification"
                       >
                         <Trash2 className="h-4 w-4" />
